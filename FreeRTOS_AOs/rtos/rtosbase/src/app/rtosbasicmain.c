@@ -18,7 +18,7 @@
 #include "bsp.h"    
 #include "LCD.h"                    
 
-
+#include "pushbutton.h"
 
 
 
@@ -52,21 +52,17 @@ void qftick_task( void * pvParameters )
 
 
 
-int main (void) {
+int main (void) 
+{
+	xTaskHandle xHandle;
+	BSP_Init();
+	
+	// init pushbutton, 1000ms for long press
+	pushbutton_init(1000);
 
-   xTaskHandle xHandle;
+	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 1, &xHandle);
 
-  
- 
-	 BSP_Init();
-
-	 xTaskCreate( qftick_task, "QFTICK" , 0x100 * 3, NULL ,1, &xHandle);
-
- 
-     vTaskStartScheduler();
-
-
-
+	vTaskStartScheduler();
 }
 
 
