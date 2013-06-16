@@ -1,0 +1,8 @@
+*.*
+!*.c
+!*.cpp
+!*.h
+!*.ini
+!*.uvproj
+!.gitignore
+!*.txt
