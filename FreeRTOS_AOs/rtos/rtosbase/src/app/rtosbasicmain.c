@@ -20,7 +20,7 @@
 #include "../includes/led.h"
 
 #include "pushbutton.h"
-
+#include "menu_ao.h"
 
 
 void qftick_task( void * pvParameters )
@@ -57,12 +57,20 @@ int main (void)
 {
 	xTaskHandle xHandle;
 	BSP_Init();
+	lcd_init();
 	LED_Init();
 	
 	// init pushbutton, 1000ms for long press
 	pushbutton_init(1000);
 
 	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 1, &xHandle);
+	
+	// TODO: initialise and start QF framework
+	
+	// construct and start MenuAO
+	MenuAO_ctor();
+	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);	
+	
 
 	vTaskStartScheduler();
 }
