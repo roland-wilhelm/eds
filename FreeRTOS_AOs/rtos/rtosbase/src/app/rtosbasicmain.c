@@ -16,7 +16,8 @@
 #include "task.h"
 #include "qp_port.h" 
 #include "bsp.h"    
-#include "LCD.h"                    
+#include "LCD.h"  
+#include "../includes/led.h"
 
 #include "pushbutton.h"
 
@@ -56,6 +57,7 @@ int main (void)
 {
 	xTaskHandle xHandle;
 	BSP_Init();
+	LED_Init();
 	
 	// init pushbutton, 1000ms for long press
 	pushbutton_init(1000);

@@ -79,8 +79,6 @@ __irq void T1_IRQHandler (void)
 	T1_stop();
 	
 	// TODO dispatch ButtonLongPressed
-	//FIO2SET = (1 << 1);
-	//FIO2CLR = (1 << 0);
 	
   T1IR        = 1;	// clear interrupt flag
   VICVectAddr = 0;	// acknowledge interrupt
@@ -135,8 +133,6 @@ __irq void P2_10_IRQHandler(void)
 			T1_stop();
 			
 			// TODO dispatch ButtonShortPressed
-			//FIO2SET = (1 << 0);
-			//FIO2CLR = (1 << 1);
 		}
 		else
 		{

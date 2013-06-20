@@ -25,29 +25,22 @@ void BSP_Init(void )  {
   lcd_print ("EventDrivenSystem");
   for (i = 0; i < 10000; i++);       /* Wait for initial display           */
 
-
-
 }
 
 void BSP_Start_AD (void) {
 
   /* test for IPC on AO - move to new state later */
    AD0CR |= 0x01000000;                  /* Start A/D Conversion               */
-//  start_ad();
-
+	//  start_ad();
 
 }
 
 
 void BSP_Display_Serial(short AD_value) {
 
-
  printf ("AD value = 0x%03x\n", AD_value);
 
-} ;
-
-
-void BSP_Display_LED(int val )  {};
+}
 
 
 void BSP_Display_LCD(int pos, int row, int value) {
@@ -85,5 +78,3 @@ void QF_onStartup(void)	  {
 	 ;
 
 	 }
-
-

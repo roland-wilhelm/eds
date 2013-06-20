@@ -1,7 +1,12 @@
-																	                   
-#include <stdio.h>
+/**
+ * led.c
+ *
+ * franz schauer
+ * june 20, 2013
+ */
+
 #include <LPC23xx.H>                    /* LPC23xx definitions                */
-#include "LCD.h"                        /* Graphic LCD function prototypes    */
+#include "../includes/led.h"
 
 
 /* Function that initializes LEDs                                             */
