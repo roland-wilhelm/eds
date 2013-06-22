@@ -456,6 +456,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\app\events.c</FilePath>
             </File>
+            <File>
+              <FileName>settime_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\settime_ao.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1170,6 +1175,11 @@
               <FileName>events.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\app\events.c</FilePath>
+            </File>
+            <File>
+              <FileName>settime_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\settime_ao.c</FilePath>
             </File>
           </Files>
         </Group>

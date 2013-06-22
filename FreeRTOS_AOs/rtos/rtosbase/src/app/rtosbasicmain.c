@@ -21,6 +21,7 @@
 
 #include "pushbutton.h"
 #include "menu_ao.h"
+#include "settime_ao.h"
 
 
 void qftick_task( void * pvParameters )
@@ -70,7 +71,10 @@ int main (void)
 	// construct and start MenuAO
 	MenuAO_ctor();
 	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);	
-	
+
+	// construct and start SetTimeAO
+	SetTimeAO_ctor();
+	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);	
 
 	vTaskStartScheduler();
 }
