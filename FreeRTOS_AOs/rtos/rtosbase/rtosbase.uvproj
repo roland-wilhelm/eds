@@ -447,6 +447,7 @@
               <FilePath>.\src\app\pushbutton.c</FilePath>
             </File>
             <File>
+<<<<<<< HEAD
               <FileName>ad_ao.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\app\ad_ao.c</FilePath>
@@ -455,6 +456,31 @@
               <FileName>log.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\src\app\log.h</FilePath>
+=======
+              <FileName>menu_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\menu_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>events.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\events.c</FilePath>
+            </File>
+            <File>
+              <FileName>settime_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\settime_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>coffeemachine_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\coffeemachine_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>coffeemachine_ao.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\src\app\coffeemachine_ao.h</FilePath>
+>>>>>>> b2d7df6b0cd0c5fa5c8f30048d3ed27b5fab834b
             </File>
           </Files>
         </Group>
@@ -707,6 +733,14 @@
               <FileType>1</FileType>
               <FilePath>.\src\drivers\led.c</FilePath>
             </File>
+<<<<<<< HEAD
+=======
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\drivers\rtc.c</FilePath>
+            </File>
+>>>>>>> b2d7df6b0cd0c5fa5c8f30048d3ed27b5fab834b
           </Files>
         </Group>
         <Group>
@@ -1162,6 +1196,7 @@
               <FilePath>.\src\app\pushbutton.c</FilePath>
             </File>
             <File>
+<<<<<<< HEAD
               <FileName>ad_ao.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\app\ad_ao.c</FilePath>
@@ -1170,6 +1205,31 @@
               <FileName>log.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\src\app\log.h</FilePath>
+=======
+              <FileName>menu_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\menu_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>events.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\events.c</FilePath>
+            </File>
+            <File>
+              <FileName>settime_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\settime_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>coffeemachine_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\coffeemachine_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>coffeemachine_ao.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\src\app\coffeemachine_ao.h</FilePath>
+>>>>>>> b2d7df6b0cd0c5fa5c8f30048d3ed27b5fab834b
             </File>
           </Files>
         </Group>
@@ -1422,6 +1482,14 @@
               <FileType>1</FileType>
               <FilePath>.\src\drivers\led.c</FilePath>
             </File>
+<<<<<<< HEAD
+=======
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\drivers\rtc.c</FilePath>
+            </File>
+>>>>>>> b2d7df6b0cd0c5fa5c8f30048d3ed27b5fab834b
           </Files>
         </Group>
         <Group>

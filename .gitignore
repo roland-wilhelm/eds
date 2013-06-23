@@ -5,4 +5,5 @@
 !*.ini
 !*.uvproj
 !.gitignore
-!*.txt
+!*.txt*.uvprof
+*.uvproj
