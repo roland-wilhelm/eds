@@ -712,6 +712,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\drivers\led.c</FilePath>
             </File>
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\drivers\rtc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1431,6 +1436,11 @@
               <FileName>led.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\drivers\led.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\drivers\rtc.c</FilePath>
             </File>
           </Files>
         </Group>
