@@ -18,8 +18,8 @@
 #include "bsp.h"    
 
 
-
-#include "pushbutton.h"
+//#include "pushbutton.h"
+#include "push_button2.h"
 #include "menu_ao.h"
 #include "settime_ao.h"
 #include "ad_ao.h"
@@ -31,34 +31,29 @@ static const QEvent *adQueueSto[3];
 static QSubscrList subscrSto[MAX_PUB_SIG];
 
 
+
 void qftick_task( void * pvParameters )
 {
 	portTickType xLastWakeTime;
-//int i;
-	const portTickType xFrequency = 1000;
+	const portTickType xFrequency = 1;
 
   // Initialise the xLastWakeTime variable with the current time.
 	xLastWakeTime = xTaskGetTickCount();
   
 	// Task code goes here.
-	for( ;; )
-		{
+	for( ;; ) {
         
 			// Wait for the next cycle.
-			vTaskDelayUntil( &xLastWakeTime, xFrequency );
+			vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
-			// Perform action here.
-      
-			QF_tick();   		//QM Port
-			
-//    while ( i--) ;  	// busy loop to slow output to terminal
-// 			printf("basic freertos task\n");
-// 												// Task code goes here.
-// 		i=0xffffff;
-		}
+			// increase timer 
+      counter(1);
+		
+			QF_tick();   		//QM Port			
+	
+	}
+
 }
-
-
 
 
 int main (void) 
@@ -70,7 +65,10 @@ int main (void)
 	QF_psInit(subscrSto, Q_DIM(subscrSto));
 	
 	// init pushbutton, 1000ms for long press
-	pushbutton_init(1000);
+	// pushbutton_init(1000);
+	
+	// init int0 as interrupt
+	int0_init();
 
 	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 1, &xHandle);
 	

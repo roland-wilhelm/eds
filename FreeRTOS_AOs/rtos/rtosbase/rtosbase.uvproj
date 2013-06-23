@@ -442,11 +442,6 @@
               <FilePath>.\src\app\rtosbasicmain.c</FilePath>
             </File>
             <File>
-              <FileName>pushbutton.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\app\pushbutton.c</FilePath>
-            </File>
-            <File>
               <FileName>ad_ao.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\app\ad_ao.c</FilePath>
@@ -470,6 +465,11 @@
               <FileName>settime_ao.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\app\settime_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>push_button2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\push_button2.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1172,11 +1172,6 @@
               <FilePath>.\src\app\rtosbasicmain.c</FilePath>
             </File>
             <File>
-              <FileName>pushbutton.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\app\pushbutton.c</FilePath>
-            </File>
-            <File>
               <FileName>ad_ao.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\app\ad_ao.c</FilePath>
@@ -1200,6 +1195,11 @@
               <FileName>settime_ao.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\app\settime_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>push_button2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\app\push_button2.c</FilePath>
             </File>
           </Files>
         </Group>

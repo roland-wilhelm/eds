@@ -22,9 +22,11 @@
 enum CoffeeAlarmSignals 
 {
 	// published signals (starting at Q_USER_SIG)
-  BUTTON_SHORTPRESS_SIG = Q_USER_SIG,
+  // push_button2: published at button short pressed
+	BUTTON_SHORTPRESS_SIG = Q_USER_SIG,
+	// push_button2: published at button long pressed
 	BUTTON_LONGPRESS_SIG,
-	// published Signal each time ad value changed
+	// ad_ao: published Signal each time ad value changed
 	AD_VALUE_SIG,
 	
 	// end of published signals

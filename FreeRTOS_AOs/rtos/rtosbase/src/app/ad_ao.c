@@ -85,7 +85,7 @@ QState ad_converting(Ad *me, const QEvent *e) {
 			DBG("AD converting: ENTRY");
 			
 			// Send TIME_TICK_SIG in defined intervals
-			QTimeEvt_postEvery(&timerEvt.super, (QActive *)me, 100);
+			QTimeEvt_postEvery(&timerEvt.super, (QActive *)me, START_AD_CONVERSION_INTERVAL);
 			
 			return Q_HANDLED();
 		}
