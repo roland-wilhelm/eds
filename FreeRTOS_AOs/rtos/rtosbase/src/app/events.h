@@ -9,6 +9,7 @@
 #define EVENTS_H_
 
 #include "qf_pkg.h"
+#include "../drivers/rtc.h"
 
 
 #define SIZE_OF_EVENT_QUEUE 128
@@ -74,6 +75,21 @@ typedef struct
 	uint8_t min;
 } TimeSetEvt;
 
+/**
+ * TimeUpdate event
+**/
+typedef struct 
+{
+  QEvent super;
+	RTCTime time;
+} TimeUpdateEvt;
 
+/**
+ * Alarm event
+**/
+typedef struct 
+{
+  QEvent super;
+} AlarmEvt;
 
 #endif // EVENTS_H_

@@ -1,4 +1,13 @@
+/**
+ * rtc.c
+ *
+ * Dennis Wilfert
+ * june 23, 2013
+ */
+ 
 #include "LPC23xx.H"                        /* LPC23xx/24xx definitions */
+#include "../app/events.h"
+#include "../app/menu_ao.h"
 #include "rtc.h"
 
 __irq void RTCHandler (void);
@@ -75,6 +84,15 @@ void RTC_GetTime( RTCTime* time )
   time->RTC_Hour = RTC_HOUR;
 }
 
+/* Returns RTC alarm time 
+ * (Only hours and minutes)
+ */
+void RTC_GetAlarm( RTCTime* alarm ) 
+{
+  alarm->RTC_Min = RTC_ALMIN;
+  alarm->RTC_Hour = RTC_ALHOUR;
+}
+
 /* Enables RTC alarm
  * (Only hours and minutes are compared)
  */
@@ -101,12 +119,17 @@ __irq void RTCHandler (void)
 {  
 	// Counter increment interrupt
 	if((RTC_ILR & ILR_RTCCIF) == 1) {
-		// TODO: postFifo
+		TimeUpdateEvt *evt = Q_NEW(TimeUpdateEvt, TIME_UPDATE_SIG);
+		evt->time.RTC_Hour = RTC_HOUR;
+		evt->time.RTC_Min = RTC_MIN;
+		// Menu gets the time update
+		QActive_postFIFO(MenuAOBase, (QEvent*)&evt);
 		RTC_ILR |= ILR_RTCCIF;		// clear interrupt flag		
 	}
 	// Alarm interrupt
 	if((RTC_ILR & ILR_RTCALF) == 1) {
-		// TODO: postFIFO
+		AlarmEvt *evt = Q_NEW(AlarmEvt, ALARM_SIG);
+		// TODO: QActive_postFIFO(, (QEvent*)&evt);
 		RTC_ILR |= ILR_RTCALF;		// clear interrupt flag		
 	}
 	RTC_ILR = 0;

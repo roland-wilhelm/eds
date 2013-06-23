@@ -1,3 +1,10 @@
+/**
+ * rtc.h
+ *
+ * Dennis Wilfert
+ * june 23, 2013
+ */
+ 
 #ifndef RTC_H_
 #define RTC_H_
 
@@ -49,6 +56,7 @@ void RTC_CTCReset( void );
 void RTC_SetTime( RTCTime* time );
 void RTC_SetAlarm( RTCTime* alarm );
 void RTC_GetTime( RTCTime* time );
+void RTC_GetAlarm( RTCTime* alarm );
 void RTC_AlarmEnable( void );
 void RTC_AlarmDisable( void );
 #endif /* end RTC_H_ */
