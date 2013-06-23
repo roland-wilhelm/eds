@@ -1,14 +1,10 @@
 #ifndef AD_AO_H
 #define AD_AO_H
 
+#include "events.h"
 
 
-typedef struct _TimerEvt {
-
-	QTimeEvt super;
-	
-} TimerEvt;
-
+// AD_VALUE_CHANGED_SIG, published Signal each time ad value changed
 typedef struct _AdValueChangedEvt {
 	
 	QEvent super;
@@ -16,24 +12,11 @@ typedef struct _AdValueChangedEvt {
 	
 } AdValueChangedEvt;
 
-typedef struct _Ad {
-	
-	QActive super;
-	
-} Ad;
-
-enum AdSignals {
-	
-	AD_VALUE_CHANGED_SIG = Q_USER_SIG,
-	MAX_PUB_SIG,
-	TIME_TICK_SIG,
-	CONVERTING_SIG,
-	MAX_SIG
-	
-};
 
 extern const QActive *adAO;
 
-int init_adAo();
+void ad_ctor(void);
+int ad_converter_init(void);
+
 
 #endif // AD_AO_H

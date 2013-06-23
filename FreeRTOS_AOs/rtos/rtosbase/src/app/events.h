@@ -24,6 +24,7 @@ enum CoffeeAlarmSignals
 	// published signals (starting at Q_USER_SIG)
   BUTTON_SHORTPRESS_SIG = Q_USER_SIG,
 	BUTTON_LONGPRESS_SIG,
+	// published Signal each time ad value changed
 	AD_VALUE_SIG,
 	
 	// end of published signals
@@ -35,6 +36,9 @@ enum CoffeeAlarmSignals
 	ALARM_SIG,
 	ENTER_SET_TIME_SIG,
 	BREWSTRENGTH_SET_SIG,
+	
+	// ad_ao: start ad conversion
+	START_AD_SIG,
 	
 	// end of pushed signals
 	MAX_SIG

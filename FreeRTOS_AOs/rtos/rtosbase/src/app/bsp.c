@@ -2,7 +2,7 @@
 #include "qp_port.h"                /* the port of the QEP event processor */
 #include "bsp.h"
 #include "LCD.h"
-
+#include "../includes/led.h"
 #include <LPC23xx.H> 
 #include <stdio.h>
 #include <stdlib.h>   
@@ -18,6 +18,7 @@ void BSP_Init(void )  {
 //  init_ad( );
 
   uart_init_0();
+	LED_Init();
   lcd_init();
   lcd_clear();
   lcd_print ("QM FreeRTOS BASE");

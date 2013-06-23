@@ -16,12 +16,19 @@
 #include "task.h"
 #include "qp_port.h" 
 #include "bsp.h"    
-#include "LCD.h"  
-#include "../includes/led.h"
+
+
 
 #include "pushbutton.h"
 #include "menu_ao.h"
 #include "settime_ao.h"
+#include "ad_ao.h"
+
+// Event Queue AD converter
+static const QEvent *adQueueSto[3];
+
+// List for publish-subscribe
+static QSubscrList subscrSto[MAX_PUB_SIG];
 
 
 void qftick_task( void * pvParameters )
@@ -58,8 +65,9 @@ int main (void)
 {
 	xTaskHandle xHandle;
 	BSP_Init();
-	lcd_init();
-	LED_Init();
+	
+	// Initialize the publish-subscribe mechanism
+	QF_psInit(subscrSto, Q_DIM(subscrSto));
 	
 	// init pushbutton, 1000ms for long press
 	pushbutton_init(1000);
@@ -76,6 +84,14 @@ int main (void)
 	SetTimeAO_ctor();
 	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);	
 
+	
+	// AD converter CTOR an start
+	ad_converter_init();
+	ad_ctor();
+	QActive_start((QActive *)&adAO, 1, adQueueSto, Q_DIM(adQueueSto),
+ 									(void *)0, 0, (QEvent *)0);
+									
+	
 	vTaskStartScheduler();
 }
 

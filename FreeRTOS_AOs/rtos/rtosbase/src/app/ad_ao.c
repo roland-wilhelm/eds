@@ -1,8 +1,19 @@
 #include "ad_ao.h"
 #include "log.h"
+#include "qf.h"
 
+typedef struct _TimerEvt {
 
-static void ad_ctor(Ad *me);
+	QTimeEvt super;
+	
+} TimerEvt;
+
+typedef struct _Ad {
+	
+	QActive super;
+	
+} Ad;
+
 static QState ad_initial(Ad *me, const QEvent *e);
 static QState ad_idle(Ad *me, const QEvent *e);
 static QState ad_converting(Ad *me, const QEvent *e);
@@ -13,13 +24,11 @@ static Ad ad;
 
 const QActive *adAO = (QActive *)&ad;
 
-static const QEvent *adQueueSto[3]; // Event Queue
-
-
-void ad_ctor(Ad *me) {
+void ad_ctor(void) {
 		
+	Ad *me = &ad;
 	QActive_ctor(&me->super, (QStateHandler)&ad_initial);
-	QTimeEvt_ctor(&timerEvt.super, TIME_TICK_SIG);
+	QTimeEvt_ctor(&timerEvt.super, START_AD_SIG);
 }
 
 QState ad_initial(Ad *me, const QEvent *e) {
@@ -90,7 +99,7 @@ QState ad_converting(Ad *me, const QEvent *e) {
 			return Q_HANDLED();
 		}	  
 
-		case TIME_TICK_SIG: {
+		case START_AD_SIG: {
 			
 			DBG("AD converting: TIME_TICK");
 			// Start AD
@@ -115,18 +124,18 @@ __irq void ADC_IRQHandler(void) {
 	if(value_old != value_cur) {
 				
  		static AdValueChangedEvt adValueEvt;
- 		static const QEvent adQEvt = {AD_VALUE_CHANGED_SIG, 0};
+ 		static const QEvent adQEvt = {AD_VALUE_SIG, 0};
  		adValueEvt.super = adQEvt;
 		adValueEvt.value = value_cur;
 		value_old = value_cur;
-		QF_published((QActive *)&ad, (QEvent *)&adValueEvt);
+		QF_publish((QEvent *)&adValueEvt);
 		
 	}
 
   VICVectAddr = 0;                      /* Acknowledge Interrupt              */
 }
 
-static int init_ad_converter() {
+int ad_converter_init() {
 	
 	/* Power enable, Setup pin, enable and setup AD converter interrupt         */
   PCONP        |= (1 << 12);                   /* Enable power to AD block    */
@@ -140,15 +149,3 @@ static int init_ad_converter() {
 	return 0;
 }
 
-int init_adAo()	{
-
-	init_ad_converter();
-													
-	ad_ctor(&ad);	/* instantiate and start the active objects... */
-
- 	QActive_start((QActive *)&ad, 1, adQueueSto, Q_DIM(adQueueSto),
- 									(void *)0, 0, (QEvent *)0);
-
-
-	return 0;
-}
