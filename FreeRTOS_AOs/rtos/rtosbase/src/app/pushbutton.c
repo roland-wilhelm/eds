@@ -9,6 +9,9 @@
 #include <LPC23xx.H>
 #include "pushbutton.h"
 
+void T1_IRQHandler (void);
+void P2_10_IRQHandler(void);
+
 /**
  * Init Timer1
  */

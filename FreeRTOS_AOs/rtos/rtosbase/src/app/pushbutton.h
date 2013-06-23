@@ -12,8 +12,6 @@
 
 void pushbutton_init(unsigned int longPressTime_ms);
 
-__irq void T1_IRQHandler (void);
-__irq void P2_10_IRQHandler(void);
 
 
 #endif // PUSHBUTTON_H_
