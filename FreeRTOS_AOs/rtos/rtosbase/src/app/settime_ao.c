@@ -27,7 +27,7 @@ QActive* const SetTimeAOBase = (QActive*)&l_SetTimeAO;
 QEvent const *l_SetTimeAOEvtQSto[SIZE_OF_EVENT_QUEUE];
 
 // static events
-static TimeSetEvt l_EnterSetTimeEvt = {{TIME_SET_SIG}};
+static TimeSetEvt l_TimeSetEvt = {{TIME_SET_SIG}};
 
 /**
  * constructor
@@ -120,8 +120,10 @@ static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e)
 		case Q_EXIT_SIG: 
 		{						
 			//Send Event: EvtTimeSet
+			l_TimeSetEvt.hours = l_SetTimeAO.hours;
+			l_TimeSetEvt.min = l_SetTimeAO.min;
 			//TODO: MenuAO not declared...
-			QActive_postFIFO(MenuAOBase, (QEvent*)&l_EnterSetTimeEvt);
+			QActive_postFIFO(MenuAOBase, (QEvent*)&l_TimeSetEvt);
 			
 			return Q_HANDLED();
 		} 	
@@ -135,7 +137,7 @@ return Q_SUPER(&SetTimeAO_Idle);
  **/
 static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 {
-	//output to format lcd-output
+	//output to format lcd-output string
 	static char* output;
 	
 	switch ( e->sig ) 
@@ -147,13 +149,11 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
-						
 			//Generate Formated String
 			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);
-			
-			// display changed Hours (2nd row of LCD)
+			// display old value of Hours (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print(output);
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -170,8 +170,8 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 			
 			// TODO calculate and save Hours
 			// ADValueEvt const* evt = (ADValueEvt*)e;
-			// short v = evt->value;
-			short v = 100;
+			// uint16_t v = evt->value;
+			uint16_t v = 100;
 			
 			// calculate hours:
 			// - ad value is from 0..100
@@ -181,15 +181,13 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 			if ( v>23 )
 				v = 23;
 			
-			
-			l_SetTimeAO.hours = (unsigned int)v;
+			l_SetTimeAO.hours = (uint8_t)v;
 			
 			//Generate Formated String
-			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);
-			
+			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);			
 			// display changed Hours (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print(output);
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -221,11 +219,10 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 		case Q_ENTRY_SIG: 
 		{
 			//Generate Formated String
-			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);
-			
-			// display changed Hours (2nd row of LCD)
+			sprintf(output, "Set Min> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);		
+			// display old value of Min (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print(output);
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -242,8 +239,8 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 			
 			// TODO calculate and save Minutes
 			// ADValueEvt const* evt = (ADValueEvt*)e;
-			// short v = evt->value;
-			short v = 100;
+			// uint16_t v = evt->value;
+			uint16_t v = 100;
 			
 			// calculate Minutes:
 			// - ad value is from 0..100
@@ -254,20 +251,20 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 			if ( v>=60 )
 				v = 59;
 			
-			l_SetTimeAO.min = (unsigned int)v;
+			l_SetTimeAO.min = (uint8_t)v;
 			
 			//Generate Formated String
-			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);
-			
-			// display changed Hours (2nd row of LCD)
+			sprintf(output, "Set Min> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);			
+			// display changed Minutes (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print(output);
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
 	 	
 		case Q_EXIT_SIG: 
 		{
+			return Q_HANDLED();
 		} 	
 	}
  

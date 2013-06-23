@@ -70,8 +70,8 @@ typedef struct
 typedef struct 
 {
   QEvent super;
-	unsigned int hours;
-	unsigned int min;
+	uint8_t hours;
+	uint8_t min;
 } TimeSetEvt;
 
 

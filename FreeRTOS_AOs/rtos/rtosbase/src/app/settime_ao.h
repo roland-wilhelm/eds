@@ -24,8 +24,8 @@ extern QEvent const *l_SetTimeAOEvtQSto[SIZE_OF_EVENT_QUEUE];
 typedef struct SetTimeAOTag {
   QActive super;
 	
-	unsigned int hours;
-	unsigned int min;
+	uint8_t hours;
+	uint8_t min;
 } SetTimeAO;
 
 // constructor
