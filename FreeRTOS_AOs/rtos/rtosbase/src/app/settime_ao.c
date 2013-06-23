@@ -1,6 +1,11 @@
 /**
- * menu_ao.c
+ * settime_ao.c
  *
+ * max hempe
+ * june 22, 2013
+ *
+ * basis is:
+ * menu_ao.c
  * franz schauer
  * june 20, 2013
  */
@@ -143,9 +148,12 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 		case Q_ENTRY_SIG: 
 		{
 						
-			// TODO display change brew strength (2nd row of LCD)
-			//set_cursor(0, 1);
-			//lcd_print("SetHrs> XX:XX");
+			//Generate Formated String
+			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);
+			
+			// display changed Hours (2nd row of LCD)
+			set_cursor(0, 1);
+			lcd_print(output);
 			
 			return Q_HANDLED();
 		}
@@ -158,26 +166,26 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 		
 		case AD_VALUE_SIG:
 		{
-			// set brew strength according to AD value
+			// set Hours according to AD value
 			
-			// TODO calculate and save brew strength
+			// TODO calculate and save Hours
 			// ADValueEvt const* evt = (ADValueEvt*)e;
 			// short v = evt->value;
 			short v = 100;
 			
-			// calculate brew strenght:
+			// calculate hours:
 			// - ad value is from 0..100
 			// - devide by 4 -> range 0.....25
-			// - if v = 25 -> v auf 23 setzen -> range 0...23
+			// - if v higher 23 -> v auf 23 setzen -> range 0...23
 			v /= 4;
-			if ( v>=24 )
+			if ( v>23 )
 				v = 23;
 			
 			
 			l_SetTimeAO.hours = (unsigned int)v;
 			
 			//Generate Formated String
-			sprintf(output, "SetHour> %d:%d", l_SetTimeAO.hours, l_SetTimeAO.min);
+			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);
 			
 			// display changed Hours (2nd row of LCD)
 			set_cursor(0, 1);
@@ -212,6 +220,13 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
+			//Generate Formated String
+			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);
+			
+			// display changed Hours (2nd row of LCD)
+			set_cursor(0, 1);
+			lcd_print(output);
+			
 			return Q_HANDLED();
 		}
 		
@@ -223,14 +238,14 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 				
 		case AD_VALUE_SIG:
 		{
-			// set brew strength according to AD value
+			// set Minutes according to AD value
 			
-			// TODO calculate and save brew strength
+			// TODO calculate and save Minutes
 			// ADValueEvt const* evt = (ADValueEvt*)e;
 			// short v = evt->value;
 			short v = 100;
 			
-			// calculate brew strenght:
+			// calculate Minutes:
 			// - ad value is from 0..100
 			// - multi by 10 and devide by 16 -> range 0.....62
 			// - if v >= 60 -> v auf 59 setzen -> range 0...59
@@ -242,7 +257,7 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 			l_SetTimeAO.min = (unsigned int)v;
 			
 			//Generate Formated String
-			sprintf(output, "SetHour> %d:%d", l_SetTimeAO.hours, l_SetTimeAO.min);
+			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);
 			
 			// display changed Hours (2nd row of LCD)
 			set_cursor(0, 1);

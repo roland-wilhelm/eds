@@ -1,9 +1,14 @@
 /**
- * menu_ao.h
+ * settime_ao.h
+ * max hempe
+ * june 22, 2013
  *
+ * basis is:
+ * menu_ao.h
  * franz schauer
  * june 20, 2013
  */
+
  
 #ifndef SETTIME_AO_H_
 #define SETTIME_AO_H_
@@ -15,7 +20,7 @@
 extern QActive* const SetTimeAOBase;
 extern QEvent const *l_SetTimeAOEvtQSto[SIZE_OF_EVENT_QUEUE];
 
-// MenuAO active object
+// SetTimeAO active object
 typedef struct SetTimeAOTag {
   QActive super;
 	
