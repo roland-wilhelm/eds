@@ -8,6 +8,7 @@
 #include "LPC23xx.H"                        /* LPC23xx/24xx definitions */
 #include "../app/events.h"
 #include "../app/menu_ao.h"
+#include "../app/coffeemachine_ao.h"
 #include "rtc.h"
 
 __irq void RTCHandler (void);
@@ -129,7 +130,7 @@ __irq void RTCHandler (void)
 	// Alarm interrupt
 	if((RTC_ILR & ILR_RTCALF) == 1) {
 		AlarmEvt *evt = Q_NEW(AlarmEvt, ALARM_SIG);
-		// TODO: QActive_postFIFO(, (QEvent*)&evt);
+		QActive_postFIFO(CoffeeMachineAO, (QEvent*)&evt);
 		RTC_ILR |= ILR_RTCALF;		// clear interrupt flag		
 	}
 	RTC_ILR = 0;
