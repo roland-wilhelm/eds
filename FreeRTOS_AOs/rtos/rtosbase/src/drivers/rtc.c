@@ -11,7 +11,12 @@
 #include "../app/coffeemachine_ao.h"
 #include "rtc.h"
 
+
 __irq void RTCHandler (void);
+
+// static events
+static AlarmEvt l_AlarmEvt = {{ALARM_SIG}};
+static TimeUpdateEvt l_TimeUpdateEvt = {{TIME_UPDATE_SIG}};
 
 /* Initialization of the RTC
  *
@@ -23,8 +28,8 @@ void RTC_Init( void )
 	RTC_AMR = 0;	// Alarm mask register
   RTC_CIIR = 0;	// Counter increment interrupt register
   RTC_CCR = 0;	// Clock control register (disable)
-  RTC_PREINT = PREINT_RTC;
-  RTC_PREFRAC = PREFRAC_RTC;
+  RTC_PREINT = PREINT_RTC; // RTC clock integer divider
+  RTC_PREFRAC = PREFRAC_RTC; // RTC clock fraction divider
 	
   VICVectAddr13  		= (unsigned long)RTCHandler;		// set IRQ handler
   VICVectPriority13  = 15;		// use it for RTC interrupt
@@ -53,7 +58,7 @@ void RTC_Stop( void )
 /* Resets RTC clock
  *
  */
-void RTC_CTCReset( void )
+void RTC_Reset( void )
 {   
   RTC_CCR |= CCR_CTCRST;
 }
@@ -120,17 +125,15 @@ __irq void RTCHandler (void)
 {  
 	// Counter increment interrupt
 	if((RTC_ILR & ILR_RTCCIF) == 1) {
-		TimeUpdateEvt *evt = Q_NEW(TimeUpdateEvt, TIME_UPDATE_SIG);
-		evt->time.RTC_Hour = RTC_HOUR;
-		evt->time.RTC_Min = RTC_MIN;
+		l_TimeUpdateEvt.time.RTC_Hour = RTC_HOUR;
+		l_TimeUpdateEvt.time.RTC_Min = RTC_MIN;
 		// Menu gets the time update
-		QActive_postFIFO(MenuAOBase, (QEvent*)&evt);
+		QActive_postFIFO(MenuAOBase, (QEvent*)&l_TimeUpdateEvt);
 		RTC_ILR |= ILR_RTCCIF;		// clear interrupt flag		
 	}
 	// Alarm interrupt
 	if((RTC_ILR & ILR_RTCALF) == 1) {
-		AlarmEvt *evt = Q_NEW(AlarmEvt, ALARM_SIG);
-		QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&evt);
+		QActive_postFIFO(CoffeeMachineAO, (QEvent*)&l_AlarmEvt);
 		RTC_ILR |= ILR_RTCALF;		// clear interrupt flag		
 	}
 	RTC_ILR = 0;
