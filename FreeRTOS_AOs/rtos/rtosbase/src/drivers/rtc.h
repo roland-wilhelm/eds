@@ -52,7 +52,7 @@ typedef enum {
 void RTC_Init( void );
 void RTC_Start( void );
 void RTC_Stop( void );
-void RTC_CTCReset( void );
+void RTC_Reset( void );
 void RTC_SetTime( RTCTime* time );
 void RTC_SetAlarm( RTCTime* alarm );
 void RTC_GetTime( RTCTime* time );
