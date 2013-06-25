@@ -133,7 +133,7 @@ __irq void RTCHandler (void)
 	}
 	// Alarm interrupt
 	if((RTC_ILR & ILR_RTCALF) == 1) {
-		QActive_postFIFO(CoffeeMachineAO, (QEvent*)&l_AlarmEvt);
+		QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_AlarmEvt);
 		RTC_ILR |= ILR_RTCALF;		// clear interrupt flag		
 	}
 	RTC_ILR = 0;
