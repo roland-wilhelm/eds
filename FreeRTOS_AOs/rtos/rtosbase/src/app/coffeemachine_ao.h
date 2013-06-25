@@ -1,8 +1,15 @@
 /**
- * coffeemachine_ao.h
+ * An active object representation with two states:
+ * - Idle
+ * - Brewing
  *
- * benedikt kleinmeier
- * june 23, 2013
+ * The following transitions are possible:
+ *
+ *                 Alarm (RTC)
+ *       +------+ -------------> +---------+
+ *  o--> | Idle |                | Brewing |
+ *       +------+ <------------- +---------+
+ *                  ShortPress
  */
  
 #ifndef COFFEE_MACHINE_H_
@@ -22,10 +29,5 @@ typedef struct CoffeeMachineAOTag {
 
 // constructor
 void CoffeeMachineAO_ctor(void);
-
-// state handlers
-static QState CoffeeMachineAO_initial(CoffeeMachineAO *me, QEvent const *e);
-static QState CoffeeMachineAO_Idle(CoffeeMachineAO *me, QEvent const *e);
-static QState CoffeeMachineAO_Brewing(CoffeeMachineAO *me, QEvent const *e);
  
 #endif // COFFEE_MACHINE_H_

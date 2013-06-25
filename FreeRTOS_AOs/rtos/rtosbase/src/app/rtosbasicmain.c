@@ -19,10 +19,11 @@
 
 
 //#include "pushbutton.h"
-#include "push_button2.h"
-#include "menu_ao.h"
-#include "settime_ao.h"
 #include "ad_ao.h"
+#include "coffeemachine_ao.h"
+#include "menu_ao.h"
+#include "push_button2.h"
+#include "settime_ao.h"
 
 // Event Queue AD converter
 static const QEvent *adQueueSto[3];
@@ -75,22 +76,20 @@ int main (void)
 	
 	// TODO: initialise and start QF framework
 	
-	// construct and start MenuAO
-	MenuAO_ctor();
-	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);	
-
-	// construct and start SetTimeAO
-	SetTimeAO_ctor();
-	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);	
-
-	// AD converter CTOR and start
 	ad_converter_init();
+	
 	ad_ctor();
-	QActive_start((QActive *)&adAO, 1, adQueueSto, Q_DIM(adQueueSto),
- 									(void *)0, 0, (QEvent *)0);
-									
+	CoffeeMachineAO_ctor();
+	MenuAO_ctor();
+	SetTimeAO_ctor();
+	
+	QActive_start((QActive *)&adAO, 1, adQueueSto, Q_DIM(adQueueSto), (void *)0, 0, (QEvent *)0);
+	QActive_start(CoffeeMachineAOBase, 1, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);	
 	
 	vTaskStartScheduler();
+	QF_run();
 }
 
 
