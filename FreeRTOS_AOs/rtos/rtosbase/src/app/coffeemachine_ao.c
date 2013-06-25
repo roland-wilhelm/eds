@@ -12,7 +12,7 @@
  
  // instance of CoffeeMachineAO and opaque pointer
  static CoffeeMachineAO l_CoffeeMachineAO;
- QActive* const CoffeeMachineAO = (QActive*)&l_CoffeeMachineAO;
+ QActive* const CoffeeMachineAOBase = (QActive*)&l_CoffeeMachineAO;
  
  // event queue for CoffeeMachineAO
  QEvent const *l_CoffeeMachineAOEvtQSto[SIZE_OF_EVENT_QUEUE];
@@ -97,4 +97,3 @@
 	 
 	 return Q_SUPER(&QHsm_top);
  }
- 

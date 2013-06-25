@@ -30,6 +30,7 @@ static const QEvent *adQueueSto[3];
 // List for publish-subscribe
 static QSubscrList subscrSto[MAX_PUB_SIG];
 
+// TODO event queues (example: rtc uses Q_NEW)
 
 
 void qftick_task( void * pvParameters )
@@ -82,8 +83,7 @@ int main (void)
 	SetTimeAO_ctor();
 	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);	
 
-	
-	// AD converter CTOR an start
+	// AD converter CTOR and start
 	ad_converter_init();
 	ad_ctor();
 	QActive_start((QActive *)&adAO, 1, adQueueSto, Q_DIM(adQueueSto),

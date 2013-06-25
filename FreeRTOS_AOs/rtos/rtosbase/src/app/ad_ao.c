@@ -119,7 +119,7 @@ __irq void ADC_IRQHandler(void) {
 	static unsigned int value_old = 0;
 	unsigned int value_cur = (AD0DR0 >> 6) & 0x3FF;      /* Read Conversion Result */
 	
-	// Result converting fo 0 to 100
+	// Result converting from 0 to 100
 	
 	if(value_old != value_cur) {
 				

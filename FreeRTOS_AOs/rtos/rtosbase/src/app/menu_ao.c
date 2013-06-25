@@ -10,6 +10,8 @@
 #include <LCD.h>
 
 #include "menu_ao.h"
+#include "settime_ao.h"
+#include "coffeemachine_ao.h"
 #include "events.h"
 
 // instance of MenuAO and opaque pointer
@@ -85,8 +87,8 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 			// long press > send change time request and wait for response
 			me->waitingForSetTime = true;
 			
-			// TODO send ENTER_SET_TIME_SIG
-			// TODO QActive_postFIFO(ChangeClockAO, (QEvent*)&l_EnterSetTimeEvt);
+			// send ENTER_SET_TIME_SIG to SetTimeAO
+			QActive_postFIFO(SetTimeAOBase, (QEvent*)&l_EnterSetTimeEvt);
 			
 			return Q_HANDLED();
 		}
@@ -231,11 +233,11 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 				// brew strength has been changed
 				me->brewStrength = brewStrength;
 				
-				// when exiting ChangeBrewStrength send brew strength to coffee machine
+				// TODO maybe better use dynamic event, but should be okay here!
 				l_BrewStrengthSetEvt.brewStrength = brewStrength;
 				
-				// TODO send BREWSTRENGTH_SET_SIG
-				// QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
+				// send BREWSTRENGTH_SET_SIG to CoffeeMachineAO
+				QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
 			}
 		} 	
 	}
@@ -280,8 +282,8 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 			// long press > send change time request and wait for response
 			me->waitingForSetTime = true;
 			
-			// TODO send ENTER_SET_TIME_SIG
-			// QActive_postFIFO(ChangeClockAO, (QEvent*)&l_EnterSetTimeEvt);
+			// send ENTER_SET_TIME_SIG to SetTimeAO
+			QActive_postFIFO(SetTimeAOBase, (QEvent*)&l_EnterSetTimeEvt);
 			
 			return Q_HANDLED();
 		}
