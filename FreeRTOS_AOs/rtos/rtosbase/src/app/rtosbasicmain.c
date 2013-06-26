@@ -68,7 +68,7 @@ int main (void)
 	QF_psInit(subscrSto, Q_DIM(subscrSto));
 
 	// create tick task
-	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 1, &xHandle);
+	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 3, &xHandle);
 
 	
 	// TODO: initialise and start QF framework
