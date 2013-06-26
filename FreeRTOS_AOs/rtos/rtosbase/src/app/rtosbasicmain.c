@@ -24,8 +24,6 @@
 #include "push_button2.h"
 #include "settime_ao.h"
 
-#define POOL_SIZE_TEST 16
-
 // Event Queue AD converter
 static const QEvent *adQueueSto[3];
 
@@ -77,10 +75,11 @@ int main (void)
 	CoffeeMachineAO_ctor();
 	
 	// start active objects
-	QActive_start(adAO, 1, adQueueSto, Q_DIM(adQueueSto), (void *)0, 0, (QEvent *)0);
-	QActive_start(SetTimeAOBase, 2, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	//QActive_start(CoffeeMachineAOBase, 0, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	//QActive_start(adAO, 1, adQueueSto, Q_DIM(adQueueSto), (void *)0, 0, (QEvent *)0);
+	//QActive_start(SetTimeAOBase, 2, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
 	QActive_start(MenuAOBase, 3, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
-	QActive_start(CoffeeMachineAOBase, 4, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	
 	
 	/* testing coffeemachine standalone
 	CoffeeMachineAO_ctor();
