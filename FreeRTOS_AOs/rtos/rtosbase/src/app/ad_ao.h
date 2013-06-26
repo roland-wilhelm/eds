@@ -5,7 +5,7 @@
 
 #define START_AD_CONVERSION_INTERVAL 100
 
-extern const QActive *adAO;
+extern QActive* const adAO;
 
 void ad_ctor(void);
 int ad_converter_init(void);

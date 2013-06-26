@@ -15,6 +15,7 @@
 #include <LCD.h>
 #include <stdio.h>
 
+#include "log.h"
 #include "settime_ao.h"
 #include "events.h"
 #include "menu_ao.h"
@@ -60,7 +61,7 @@ void SetTimeAO_ctor(void)
  **/
 static QState SetTimeAO_initial(SetTimeAO *me, QEvent const *e)
 {
-	
+	DBG("StateTime_Initial")
 	return Q_TRAN(&SetTimeAO_Idle);
 }
 
@@ -73,23 +74,25 @@ static QState SetTimeAO_Idle(SetTimeAO *me, QEvent const *e)
 	{
 		case Q_INIT_SIG: 
 		{
+			DBG("StateTime_Idle INIT")
 			return Q_HANDLED();
 		}
 	      
 		case Q_ENTRY_SIG: 
 		{
-	
+			DBG("StateTime_Idle ENTRY")
 			return Q_HANDLED();
 		}
 				
 		case ENTER_SET_TIME_SIG:
 		{
-						
+			DBG("StateTime_Idle ENTER_SET_TIME")
 			return Q_TRAN(&SetTimeAO_Changing);
 		}
 			 	
 		case Q_EXIT_SIG: 
 		{
+			DBG("StateTime_Idle EXIT")
 			return Q_HANDLED();
 		} 	
 	}
@@ -106,12 +109,14 @@ static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e)
 	{
 		case Q_INIT_SIG: 
 		{
+			DBG("StateTime_Changing INIT")
 			//GoTo State Change Hours
 			return Q_TRAN(&SetTimeAO_ChangeHrs);
 		}
 	      
 		case Q_ENTRY_SIG: 
 		{
+			DBG("StateTime_Changing ENTRY")
 			//Subscribe Button & AD_Value
 			QActive_subscribe(SetTimeAOBase, BUTTON_SHORTPRESS_SIG);
 			QActive_subscribe(SetTimeAOBase, BUTTON_LONGPRESS_SIG);
@@ -121,7 +126,8 @@ static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e)
 		}
 		
 		case BUTTON_LONGPRESS_SIG: 
-		{	
+		{
+			DBG("StateTime_Changing BUTTON_LONG")
 			//Unsubscribe Button & AD_Value
 			QActive_unsubscribe(SetTimeAOBase, BUTTON_SHORTPRESS_SIG);
 			QActive_unsubscribe(SetTimeAOBase, BUTTON_LONGPRESS_SIG);
@@ -132,7 +138,8 @@ static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e)
 		}
 	 	
 		case Q_EXIT_SIG: 
-		{						
+		{			
+			DBG("StateTime_Changing EXIT")
 			//Send Event: EvtTimeSet
 			l_TimeSetEvt.time.RTC_Min = l_SetTimeAO.time.RTC_Min;
 			l_TimeSetEvt.time.RTC_Hour = l_SetTimeAO.time.RTC_Hour;
@@ -158,34 +165,38 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 	{
 		case Q_INIT_SIG: 
 		{
+			DBG("StateTime_ChangeHrs INIT")
 			return Q_HANDLED();
 		}
 	      
 		case Q_ENTRY_SIG: 
 		{
-			//Generate Formated String
-			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);
-			// display old value of Hours (2nd row of LCD)
+			DBG("StateTime_ChangeHrs ENTRY")
+			// display Status (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print((unsigned char*)output);
+			lcd_print((unsigned char*)"SetHour> ");
 			
 			return Q_HANDLED();
 		}
 		
 		case BUTTON_SHORTPRESS_SIG: 
 		{
+			DBG("StateTime_ChangeHrs BUTTON_SHORT")
 			// short press > ChangeHrs finished, goto ChangeMin
 			return Q_TRAN(&SetTimeAO_ChangeMin);
 		}
 		
 		case AD_VALUE_SIG:
 		{
+			DBG("StateTime_ChangeHrs AD_VALUE")
 			// set Hours according to AD value
 			
-			// TODO calculate and save Hours
+			// calculate and save Hours
 			// ADValueEvt const* evt = (ADValueEvt*)e;
 			// uint16_t v = evt->value;
-			uint16_t v = 100;
+			AdValueChangedEvt *evt =  (AdValueChangedEvt*)e;
+			uint16_t v = evt->value;
+			
 			
 			// calculate hours:
 			// - ad value is from 0..100
@@ -208,6 +219,7 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
+			DBG("StateTime_ChangeHrs EXIT")
 			return Q_HANDLED();
 		} 	
 	}
@@ -221,40 +233,43 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 {
 	//output to format lcd-output
-	static char* output;
+	static char output[17];
 	
 	switch ( e->sig ) 
 	{
 		case Q_INIT_SIG: 
 		{
+			DBG("StateTime_ChangeMin INIT")
 			return Q_HANDLED();
 		}
 	      
 		case Q_ENTRY_SIG: 
-		{
-			//Generate Formated String
-			sprintf(output, "Set Min> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);		
-			// display old value of Min (2nd row of LCD)
+		{		
+			DBG("StateTime_ChangeMin ENTRY")
+			// display Status (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print((unsigned char*)output);
+			lcd_print((unsigned char*)"Set Min> ");
 			
 			return Q_HANDLED();
 		}
 		
 		case BUTTON_SHORTPRESS_SIG: 
 		{
+			DBG("StateTime_ChangeMin BUTTON_SHORT")
 			//Change Min finished -> go back to Chang Hrs
 			return Q_TRAN(&SetTimeAO_ChangeHrs);
 		}
 				
 		case AD_VALUE_SIG:
 		{
+			DBG("StateTime_ChangeMin AD_VALUE")
 			// set Minutes according to AD value
 			
-			// TODO calculate and save Minutes
+			// calculate and save Minutes
 			// ADValueEvt const* evt = (ADValueEvt*)e;
 			// uint16_t v = evt->value;
-			uint16_t v = 100;
+			AdValueChangedEvt *evt =  (AdValueChangedEvt*)e;
+			uint16_t v = evt->value;
 			
 			// calculate Minutes:
 			// - ad value is from 0..100
@@ -278,6 +293,7 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
+			DBG("StateTime_ChangeMin EXIT")
 			return Q_HANDLED();
 		} 	
 	}
