@@ -8,11 +8,20 @@
 #include <stdbool.h>
 #include <LPC23xx.H>
 #include <LCD.h>
+#include <stdio.h>
 
 #include "menu_ao.h"
 #include "settime_ao.h"
 #include "coffeemachine_ao.h"
 #include "events.h"
+
+// MenuAO active object
+typedef struct MenuAOTag {
+  QActive super;
+	
+	BrewStrength brewStrength;
+	bool waitingForSetTime;
+} MenuAO;
 
 // instance of MenuAO and opaque pointer
 static MenuAO l_MenuAO;
@@ -24,6 +33,16 @@ QEvent const *l_MenuAOEvtQSto[SIZE_OF_EVENT_QUEUE];
 // static events
 static BrewStrengthSetEvt l_BrewStrengthSetEvt = {{BREWSTRENGTH_SET_SIG}};
 static EnterSetTimeEvt l_EnterSetTimeEvt = {{ENTER_SET_TIME_SIG}};
+
+// static output string
+static char output[17];
+
+// state handlers
+static QState MenuAO_initial(MenuAO *me, QEvent const *e);
+static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e);
+static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e);
+static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e);
+static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e);
 
 /**
  * constructor
@@ -64,10 +83,13 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
-			// TODO display clock menu (1st row of LCD)
+			// TODO
+			sprintf(output, "1: Clock %2d:%2d", 12, 12);
+			
+			// display clock menu (1st row of LCD)
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("1: Clock XX:XX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -97,10 +119,13 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 		{
 			me->waitingForSetTime = false;
 			
-			// TODO display new time (1st row of LCD)
+			// TODO
+			sprintf(output, "1: Clock %2d:%2d", 12, 12);
+			
+			// display new time (1st row of LCD)
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("1: Clock XX:XX");
+			lcd_print((unsigned char*)output);
 			
 			// TODO save time at RTC
 			
@@ -109,9 +134,12 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 		
 		case TIME_UPDATE_SIG:
 		{
-			// TODO display updated time
+			// TODO
+			sprintf(output, "1: Clock %2d:%2d", 12, 12);
+			
+			// display updated time
 			set_cursor(0, 0);
-			lcd_print("1: Clock XX:XX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -138,10 +166,12 @@ static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
+			sprintf(output, "2: Strength %d", me->brewStrength);
+			
 			// TODO display brew strength menu (1st row of LCD)
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("2: Strength XXXX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -181,12 +211,14 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
+			sprintf(output, "SetStrength> %d", me->brewStrength);
+			
 			// reset brew strength
 			brewStrength = Unchanged;
 			
 			// TODO display change brew strength (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print("> XXXX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -219,9 +251,11 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 			
 			brewStrength = (BrewStrength)(((v * 2 + 50) / 100));
 			
+			sprintf(output, "SetStrength> %d", brewStrength);
+			
 			// TODO display change brew strength (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print("> XXXX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -259,10 +293,13 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
-			// TODO display alarm menu (1st row of LCD)
+			// TODO
+			sprintf(output, "3: Alarm %2d:%2d", 12, 12);
+			
+			// display alarm menu (1st row of LCD)
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("3: Alarm XX:XX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -292,10 +329,13 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 		{
 			me->waitingForSetTime = false;
 			
+			// TODO
+			sprintf(output, "3: Alarm %2d:%2d", 12, 12);
+			
 			// TODO display new alarm
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("3: Alarm XX:XX");
+			lcd_print((unsigned char*)output);
 			
 			// TODO arm alarm clock at RTC
 			

@@ -19,6 +19,14 @@
 #include "events.h"
 #include "menu_ao.h"
 
+// SetTimeAO active object
+typedef struct SetTimeAOTag {
+  QActive super;
+	
+	uint8_t hours;
+	uint8_t min;
+} SetTimeAO;
+
 // instance of SetTimeAO and opaque pointer
 static SetTimeAO l_SetTimeAO;
 QActive* const SetTimeAOBase = (QActive*)&l_SetTimeAO;
@@ -28,6 +36,13 @@ QEvent const *l_SetTimeAOEvtQSto[SIZE_OF_EVENT_QUEUE];
 
 // static events
 static TimeSetEvt l_TimeSetEvt = {{TIME_SET_SIG}};
+
+// state handlers
+static QState SetTimeAO_initial(SetTimeAO *me, QEvent const *e);
+static QState SetTimeAO_Idle(SetTimeAO *me, QEvent const *e);
+static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e);
+static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e);
+static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e);
 
 /**
  * constructor
@@ -138,7 +153,7 @@ return Q_SUPER(&SetTimeAO_Idle);
 static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 {
 	//output to format lcd-output string
-	static char* output;
+	static char output[17];
 	
 	switch ( e->sig ) 
 	{
