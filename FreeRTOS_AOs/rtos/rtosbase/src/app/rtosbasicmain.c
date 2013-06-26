@@ -32,9 +32,6 @@ static const QEvent *adQueueSto[3];
 // List for publish-subscribe
 static QSubscrList subscrSto[MAX_PUB_SIG];
 
-static AlarmEvt l_smlPoolSto[POOL_SIZE_TEST];
-static TimeUpdateEvt l_medPoolSto[POOL_SIZE_TEST];
-
 void qftick_task( void * pvParameters )
 {
 	portTickType xLastWakeTime;
@@ -52,10 +49,8 @@ void qftick_task( void * pvParameters )
 			// increase timer 
       counter(1);
 		
-			QF_tick();   		//QM Port			
-	
+			QF_tick();   		//QM Port
 	}
-
 }
 
 
@@ -66,34 +61,34 @@ int main (void)
 	// Hardware initialization
 	BSP_Init();
 	ad_converter_init();
-	int0_init(); // init int0 as interrupt
+	int0_init(); // init int0 as interrupt for pushbutton
 	
 	// QP/C framework initialization
 	QF_init();
-	
-	QF_poolInit(l_smlPoolSto, sizeof(l_smlPoolSto), sizeof(l_smlPoolSto[0]));
-	// QF_poolInit(l_medPoolSto, sizeof(l_medPoolSto), sizeof(l_medPoolSto[0]));
-	
 	QF_psInit(subscrSto, Q_DIM(subscrSto));
 
+	// create tick task
 	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 1, &xHandle);
 	
-	/*	
+	// construct active objects
 	ad_ctor();
-	CoffeeMachineAO_ctor();
-	MenuAO_ctor();
 	SetTimeAO_ctor();
+	MenuAO_ctor();
+	CoffeeMachineAO_ctor();
 	
-	QActive_start((QActive *)&adAO, 1, adQueueSto, Q_DIM(adQueueSto), (void *)0, 0, (QEvent *)0);
-	QActive_start(CoffeeMachineAOBase, 1, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
-	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
-	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);	
-	*/
+	// start active objects
+	QActive_start(adAO, 1, adQueueSto, Q_DIM(adQueueSto), (void *)0, 0, (QEvent *)0);
+	QActive_start(SetTimeAOBase, 2, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	QActive_start(MenuAOBase, 3, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	QActive_start(CoffeeMachineAOBase, 4, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	
+	/* testing coffeemachine standalone
 	CoffeeMachineAO_ctor();
 	QActive_start(CoffeeMachineAOBase, 1, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	*/
 	
-	// vTaskStartScheduler();
-	QF_run();
+	// run QF
+	QF_run();	// calls vTaskStartScheduler
 }
 
 

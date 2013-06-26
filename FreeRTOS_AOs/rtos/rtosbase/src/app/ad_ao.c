@@ -22,7 +22,7 @@ static QState ad_converting(Ad *me, const QEvent *e);
 static TimerEvt timerEvt;  
 static Ad ad;
 
-const QActive *adAO = (QActive *)&ad;
+QActive* const adAO = (QActive *)&ad;
 
 void ad_ctor(void) {
 		
