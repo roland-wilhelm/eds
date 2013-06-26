@@ -12,8 +12,8 @@
 #include "../drivers/rtc.h"
 
 
-#define SIZE_OF_EVENT_QUEUE 128
-#define SIZE_OF_EVENT_POOL	128
+#define SIZE_OF_EVENT_QUEUE 3
+//#define SIZE_OF_EVENT_POOL	1
 
 
 /**

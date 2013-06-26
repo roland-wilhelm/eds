@@ -1,117 +1,9 @@
+#include "events.h"
+
 #include "ad_ao.h"
 #include "log.h"
 #include "qf.h"
 
-typedef struct _TimerEvt {
-
-	QTimeEvt super;
-	
-} TimerEvt;
-
-typedef struct _Ad {
-	
-	QActive super;
-	
-} Ad;
-
-static QState ad_initial(Ad *me, const QEvent *e);
-static QState ad_idle(Ad *me, const QEvent *e);
-static QState ad_converting(Ad *me, const QEvent *e);
-
-
-static TimerEvt timerEvt;  
-static Ad ad;
-
-QActive* const adAO = (QActive *)&ad;
-
-void ad_ctor(void) {
-		
-	Ad *me = &ad;
-	QActive_ctor(&me->super, (QStateHandler)&ad_initial);
-	QTimeEvt_ctor(&timerEvt.super, START_AD_SIG);
-}
-
-QState ad_initial(Ad *me, const QEvent *e) {
-	
-	(void)e;               /* avoid compiler warning about unused parameter */
-    
-	return Q_TRAN(&ad_idle);
-}
-
-QState ad_idle(Ad *me, const QEvent *e) {
-	
-	switch (e->sig) {
-   
-		case Q_INIT_SIG: {
-			
-			DBG("AD idle: INIT");
-			
-			return Q_TRAN(&ad_converting);
-		}
-
-		case Q_ENTRY_SIG: {
-			
-			DBG("AD idle: ENTRY");			
-			
-			return Q_HANDLED();
-		}
-		
-		case Q_EXIT_SIG: {
-   				
-			DBG("AD idle: EXIT");
-									
-			return Q_HANDLED();
-		}	  
-				
-	}
-	 
-	return Q_SUPER(&QHsm_top);	
-	
-}
-
-QState ad_converting(Ad *me, const QEvent *e) {
-	
-	switch (e->sig) {
-   
-		case Q_INIT_SIG: {
-			
-			DBG("AD converting: INIT");			
-			
-			return Q_HANDLED();
-		}
-
-		case Q_ENTRY_SIG: {
-			
-			DBG("AD converting: ENTRY");
-			
-			// Send TIME_TICK_SIG in defined intervals
-			QTimeEvt_postEvery(&timerEvt.super, (QActive *)me, START_AD_CONVERSION_INTERVAL);
-			
-			return Q_HANDLED();
-		}
-		
-		case Q_EXIT_SIG: {
-   				
-			DBG("AD converting: EXIT");
-			
-			QTimeEvt_disarm(&timerEvt.super);
-			
-			return Q_HANDLED();
-		}	  
-
-		case START_AD_SIG: {
-			
-			DBG("AD converting: TIME_TICK");
-			// Start AD
-			AD0CR |= 0x01000000;                  /* Start A/D Conversion               */
-			
-      return Q_HANDLED();
-		}		
-			
-	}
-	 
-	return Q_SUPER(&ad_idle);
-}
 
 /* A/D IRQ: Executed when A/D Conversion is done                              */
 __irq void ADC_IRQHandler(void) {
@@ -119,8 +11,12 @@ __irq void ADC_IRQHandler(void) {
 	static unsigned int value_old = 0;
 	unsigned int value_cur = (AD0DR0 >> 6) & 0x3FF;      /* Read Conversion Result */
 	
+	VICIntEnClr  = (1  << 18);                  /* Disable ADC Interrupt        */
+	
+	value_cur = value_cur / 10.2;
+	
 	// Result converting from 0 to 100
-	DBG("ADC value %d", value_cur);
+	printf("ADC %d\n\r", value_cur);
 	if(value_old != value_cur) {
 				
 		
@@ -129,11 +25,13 @@ __irq void ADC_IRQHandler(void) {
  		adValueEvt.super = adQEvt;
 		adValueEvt.value = value_cur;
 		value_old = value_cur;
-		DBG("ADC value sent %d", value_old);
+		//printf("ADC value sent %d\n\r", value_old);
 		QF_publish((QEvent *)&adValueEvt);
 		
 	}
 
+	EXTINT = 0x01; 												// Clear the peripheral interrupt flag
+	VICIntEnable  = (1  << 18);           /* Enable ADC Interrupt        */
   VICVectAddr = 0;                      /* Acknowledge Interrupt              */
 }
 
@@ -150,4 +48,14 @@ int ad_converter_init() {
 	
 	return 0;
 }
+
+int start_ad_conversion() {
+	
+	DBG("AD start converting.");
+	// Start A/D Conversion
+	AD0CR |= 0x01000000;
+	
+	return 0;
+}
+
 
