@@ -76,14 +76,14 @@ int main (void)
 	
 	// TODO: initialise and start QF framework
 	
-	ad_converter_init();
-	
+	// Init and start ADC
+	ad_converter_init();	
 	ad_ctor();
 	CoffeeMachineAO_ctor();
 	MenuAO_ctor();
 	SetTimeAO_ctor();
 	
-	QActive_start((QActive *)&adAO, 1, adQueueSto, Q_DIM(adQueueSto), (void *)0, 0, (QEvent *)0);
+	QActive_start((QActive *)adAO, 1, adQueueSto, Q_DIM(adQueueSto), (void *)0, 0, (QEvent *)0);
 	QActive_start(CoffeeMachineAOBase, 1, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
 	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
 	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);	
