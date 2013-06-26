@@ -163,11 +163,9 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
-			//Generate Formated String
-			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);
-			// display old value of Hours (2nd row of LCD)
+			// display Status (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print((unsigned char*)output);
+			lcd_print((unsigned char*)"SetHour> ");
 			
 			return Q_HANDLED();
 		}
@@ -182,10 +180,12 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 		{
 			// set Hours according to AD value
 			
-			// TODO calculate and save Hours
+			// calculate and save Hours
 			// ADValueEvt const* evt = (ADValueEvt*)e;
 			// uint16_t v = evt->value;
-			uint16_t v = 100;
+			AdValueChangedEvt *evt =  (AdValueChangedEvt*)e;
+			uint16_t v = evt->value;
+			
 			
 			// calculate hours:
 			// - ad value is from 0..100
@@ -221,7 +221,7 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 {
 	//output to format lcd-output
-	static char* output;
+	static char output[17];
 	
 	switch ( e->sig ) 
 	{
@@ -231,12 +231,10 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 		}
 	      
 		case Q_ENTRY_SIG: 
-		{
-			//Generate Formated String
-			sprintf(output, "Set Min> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);		
-			// display old value of Min (2nd row of LCD)
+		{		
+			// display Status (2nd row of LCD)
 			set_cursor(0, 1);
-			lcd_print((unsigned char*)output);
+			lcd_print((unsigned char*)"Set Min> ");
 			
 			return Q_HANDLED();
 		}
@@ -251,10 +249,11 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 		{
 			// set Minutes according to AD value
 			
-			// TODO calculate and save Minutes
+			// calculate and save Minutes
 			// ADValueEvt const* evt = (ADValueEvt*)e;
 			// uint16_t v = evt->value;
-			uint16_t v = 100;
+			AdValueChangedEvt *evt =  (AdValueChangedEvt*)e;
+			uint16_t v = evt->value;
 			
 			// calculate Minutes:
 			// - ad value is from 0..100
