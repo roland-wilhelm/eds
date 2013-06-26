@@ -14,28 +14,14 @@
 #define SETTIME_AO_H_
 
 #include "qf_pkg.h"
+#include "../drivers/rtc.h"
 #include "events.h"
 
 // make opaque pointers available externally
 extern QActive* const SetTimeAOBase;
 extern QEvent const *l_SetTimeAOEvtQSto[SIZE_OF_EVENT_QUEUE];
 
-// SetTimeAO active object
-typedef struct SetTimeAOTag {
-  QActive super;
-	
-	uint8_t hours;
-	uint8_t min;
-} SetTimeAO;
-
 // constructor
 void SetTimeAO_ctor(void);
-
-// state handlers
-static QState SetTimeAO_initial(SetTimeAO *me, QEvent const *e);
-static QState SetTimeAO_Idle(SetTimeAO *me, QEvent const *e);
-static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e);
-static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e);
-static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e);
 
 #endif // SETTIME_AO_H_

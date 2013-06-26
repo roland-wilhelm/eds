@@ -19,6 +19,13 @@
 #include "events.h"
 #include "menu_ao.h"
 
+// SetTimeAO active object
+typedef struct SetTimeAOTag {
+  QActive super;
+	
+	RTCTime time;
+} SetTimeAO;
+
 // instance of SetTimeAO and opaque pointer
 static SetTimeAO l_SetTimeAO;
 QActive* const SetTimeAOBase = (QActive*)&l_SetTimeAO;
@@ -29,6 +36,13 @@ QEvent const *l_SetTimeAOEvtQSto[SIZE_OF_EVENT_QUEUE];
 // static events
 static TimeSetEvt l_TimeSetEvt = {{TIME_SET_SIG}};
 
+// state handlers
+static QState SetTimeAO_initial(SetTimeAO *me, QEvent const *e);
+static QState SetTimeAO_Idle(SetTimeAO *me, QEvent const *e);
+static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e);
+static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e);
+static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e);
+
 /**
  * constructor
  **/
@@ -37,8 +51,8 @@ void SetTimeAO_ctor(void)
 	SetTimeAO* me = &l_SetTimeAO;
 	QActive_ctor(&me->super, (QStateHandler)&SetTimeAO_initial);
 	
-	me->hours = 0;
-	me->min = 0;
+	me->time.RTC_Min = 0;
+	me->time.RTC_Hour = 0;
 }
 
 /**
@@ -120,8 +134,8 @@ static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e)
 		case Q_EXIT_SIG: 
 		{						
 			//Send Event: EvtTimeSet
-			l_TimeSetEvt.hours = l_SetTimeAO.hours;
-			l_TimeSetEvt.min = l_SetTimeAO.min;
+			l_TimeSetEvt.time.RTC_Min = l_SetTimeAO.time.RTC_Min;
+			l_TimeSetEvt.time.RTC_Hour = l_SetTimeAO.time.RTC_Hour;
 			//TODO: MenuAO not declared...
 			QActive_postFIFO(MenuAOBase, (QEvent*)&l_TimeSetEvt);
 			
@@ -138,7 +152,7 @@ return Q_SUPER(&SetTimeAO_Idle);
 static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 {
 	//output to format lcd-output string
-	static char* output;
+	static char output[17];
 	
 	switch ( e->sig ) 
 	{
@@ -150,7 +164,7 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 		case Q_ENTRY_SIG: 
 		{
 			//Generate Formated String
-			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);
+			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);
 			// display old value of Hours (2nd row of LCD)
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);
@@ -181,10 +195,10 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 			if ( v>23 )
 				v = 23;
 			
-			l_SetTimeAO.hours = (uint8_t)v;
+			l_SetTimeAO.time.RTC_Hour = (uint8_t)v;
 			
 			//Generate Formated String
-			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);			
+			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);			
 			// display changed Hours (2nd row of LCD)
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);
@@ -219,7 +233,7 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 		case Q_ENTRY_SIG: 
 		{
 			//Generate Formated String
-			sprintf(output, "Set Min> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);		
+			sprintf(output, "Set Min> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);		
 			// display old value of Min (2nd row of LCD)
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);
@@ -251,10 +265,10 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 			if ( v>=60 )
 				v = 59;
 			
-			l_SetTimeAO.min = (uint8_t)v;
+			l_SetTimeAO.time.RTC_Min = (uint8_t)v;
 			
 			//Generate Formated String
-			sprintf(output, "Set Min> %2d:%2d", l_SetTimeAO.hours, l_SetTimeAO.min);			
+			sprintf(output, "Set Min> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);			
 			// display changed Minutes (2nd row of LCD)
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);

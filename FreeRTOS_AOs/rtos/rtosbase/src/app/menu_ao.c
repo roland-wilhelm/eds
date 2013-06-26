@@ -8,11 +8,21 @@
 #include <stdbool.h>
 #include <LPC23xx.H>
 #include <LCD.h>
+#include <stdio.h>
 
 #include "menu_ao.h"
 #include "settime_ao.h"
 #include "coffeemachine_ao.h"
+#include "../drivers/rtc.h"
 #include "events.h"
+
+// MenuAO active object
+typedef struct MenuAOTag {
+  QActive super;
+	
+	BrewStrength brewStrength;
+	bool waitingForSetTime;
+} MenuAO;
 
 // instance of MenuAO and opaque pointer
 static MenuAO l_MenuAO;
@@ -24,6 +34,17 @@ QEvent const *l_MenuAOEvtQSto[SIZE_OF_EVENT_QUEUE];
 // static events
 static BrewStrengthSetEvt l_BrewStrengthSetEvt = {{BREWSTRENGTH_SET_SIG}};
 static EnterSetTimeEvt l_EnterSetTimeEvt = {{ENTER_SET_TIME_SIG}};
+
+// static variables
+static char output[17];
+static RTCTime rtcTime;
+
+// state handlers
+static QState MenuAO_initial(MenuAO *me, QEvent const *e);
+static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e);
+static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e);
+static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e);
+static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e);
 
 /**
  * constructor
@@ -47,6 +68,10 @@ static QState MenuAO_initial(MenuAO *me, QEvent const *e)
 	QActive_subscribe(MenuAOBase, BUTTON_LONGPRESS_SIG);
 	QActive_subscribe(MenuAOBase, AD_VALUE_SIG);
 	
+	// Initialize RTC
+	RTC_Init();
+	RTC_Start();
+	
 	return Q_TRAN(&MenuAO_ClockMenu);
 }
 
@@ -64,10 +89,14 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
-			// TODO display clock menu (1st row of LCD)
+			// get current time
+			RTC_GetTime(&rtcTime);
+			sprintf(output, "1: Clock %2d:%2d", rtcTime.RTC_Hour, rtcTime.RTC_Min);
+			
+			// display clock menu (1st row of LCD)
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("1: Clock XX:XX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -95,23 +124,31 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 		
 		case TIME_SET_SIG:
 		{
+			TimeSetEvt* evt = (TimeSetEvt*)e;
 			me->waitingForSetTime = false;
 			
-			// TODO display new time (1st row of LCD)
+			// display new time (1st row of LCD)
+			sprintf(output, "1: Clock %2d:%2d", evt->time.RTC_Hour, evt->time.RTC_Min);
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("1: Clock XX:XX");
+			lcd_print((unsigned char*)output);
 			
-			// TODO save time at RTC
+			// save time at RTC
+			RTC_Stop();
+			RTC_SetTime(&evt->time);
+			RTC_Start();
 			
 			return Q_HANDLED();
 		}
 		
 		case TIME_UPDATE_SIG:
 		{
-			// TODO display updated time
+			// display updated time
+			TimeUpdateEvt* evt = (TimeUpdateEvt*)e;
+			sprintf(output, "1: Clock %2d:%2d", evt->time.RTC_Hour, evt->time.RTC_Min);
+			
 			set_cursor(0, 0);
-			lcd_print("1: Clock XX:XX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -138,10 +175,12 @@ static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
+			sprintf(output, "2: Strength %d", me->brewStrength);
+			
 			// TODO display brew strength menu (1st row of LCD)
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("2: Strength XXXX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -170,7 +209,7 @@ static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e)
  **/
 static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 {
-	static BrewStrength brewStrength;
+	static BrewStrength tmpBrewStrength;
 	
 	switch ( e->sig ) 
 	{
@@ -180,13 +219,14 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 		}
 	      
 		case Q_ENTRY_SIG: 
-		{
+		{		
 			// reset brew strength
-			brewStrength = Unchanged;
+			tmpBrewStrength = Unchanged;
 			
-			// TODO display change brew strength (2nd row of LCD)
+			// display change brew strength (2nd row of LCD)
+			sprintf(output, "SetStrength> %d", me->brewStrength);
 			set_cursor(0, 1);
-			lcd_print("> XXXX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -204,37 +244,34 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 		}
 		
 		case AD_VALUE_SIG:
-		{
+		{		
 			// set brew strength according to AD value
-			
-			// TODO calculate and save brew strength
-			// ADValueEvt const* evt = (ADValueEvt*)e;
-			// short v = evt->value;
-			short v = 100;
 			
 			// calculate brew strenght:
 			// - ad value is from 0..100
 			// - multiplying by 2 and dividing by 100 scales between 0..2
 			// - adding 50 for correct rounding (integer-division)
 			
-			brewStrength = (BrewStrength)(((v * 2 + 50) / 100));
-			
-			// TODO display change brew strength (2nd row of LCD)
+			AdValueChangedEvt* evt = (AdValueChangedEvt*)e;
+			tmpBrewStrength = (BrewStrength)(((evt->value * 2 + 50) / 100));
+					
+			// display change brew strength (2nd row of LCD)
+			sprintf(output, "SetStrength> %d", tmpBrewStrength);
 			set_cursor(0, 1);
-			lcd_print("> XXXX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
 	 	
 		case Q_EXIT_SIG: 
 		{
-			if (brewStrength != Unchanged)
+			if (tmpBrewStrength != Unchanged)
 			{
 				// brew strength has been changed
-				me->brewStrength = brewStrength;
+				me->brewStrength = tmpBrewStrength;
 				
 				// TODO maybe better use dynamic event, but should be okay here!
-				l_BrewStrengthSetEvt.brewStrength = brewStrength;
+				l_BrewStrengthSetEvt.brewStrength = tmpBrewStrength;
 				
 				// send BREWSTRENGTH_SET_SIG to CoffeeMachineAO
 				QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
@@ -259,10 +296,14 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
-			// TODO display alarm menu (1st row of LCD)
+			// get current alarm
+			RTC_GetAlarm(&rtcTime);
+			sprintf(output, "3: Alarm %2d:%2d", rtcTime.RTC_Hour, rtcTime.RTC_Min);
+			
+			// display alarm menu (1st row of LCD)
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("3: Alarm XX:XX");
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}
@@ -290,14 +331,20 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 		
 		case TIME_SET_SIG:
 		{
+			TimeSetEvt* evt = (TimeSetEvt*)e;
 			me->waitingForSetTime = false;
 			
-			// TODO display new alarm
+			// save and arm time at RTC
+			RTC_AlarmDisable();
+			RTC_SetAlarm(&evt->time);
+			RTC_AlarmEnable();
+			
+			// display new alarm
+			sprintf(output, "3: Alarm %2d:%2d", evt->time.RTC_Hour, evt->time.RTC_Min);
+
 			lcd_clear();
 			set_cursor(0, 0);
-			lcd_print("3: Alarm XX:XX");
-			
-			// TODO arm alarm clock at RTC
+			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
 		}

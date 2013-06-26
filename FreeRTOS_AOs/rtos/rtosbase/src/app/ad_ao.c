@@ -120,7 +120,7 @@ __irq void ADC_IRQHandler(void) {
 	unsigned int value_cur = (AD0DR0 >> 6) & 0x3FF;      /* Read Conversion Result */
 	
 	// Result converting from 0 to 100
-	DBG("ADC value %d", value_cur);
+	// DBG("ADC value %d", value_cur);
 	if(value_old != value_cur) {
 				
  		static AdValueChangedEvt adValueEvt;

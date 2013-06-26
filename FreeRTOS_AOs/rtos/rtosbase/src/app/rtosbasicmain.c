@@ -17,7 +17,6 @@
 #include "qp_port.h" 
 #include "bsp.h"    
 
-
 //#include "pushbutton.h"
 #include "ad_ao.h"
 #include "coffeemachine_ao.h"
@@ -25,14 +24,16 @@
 #include "push_button2.h"
 #include "settime_ao.h"
 
+#define POOL_SIZE_TEST 16
+
 // Event Queue AD converter
 static const QEvent *adQueueSto[3];
 
 // List for publish-subscribe
 static QSubscrList subscrSto[MAX_PUB_SIG];
 
-// TODO event queues (example: rtc uses Q_NEW)
-
+static AlarmEvt l_smlPoolSto[POOL_SIZE_TEST];
+static TimeUpdateEvt l_medPoolSto[POOL_SIZE_TEST];
 
 void qftick_task( void * pvParameters )
 {
@@ -61,34 +62,35 @@ void qftick_task( void * pvParameters )
 int main (void) 
 {
 	xTaskHandle xHandle;
+	
+	// Hardware initialization
 	BSP_Init();
+	ad_converter_init();
+	int0_init(); // init int0 as interrupt
 	
-	// Initialize the publish-subscribe mechanism
+	// QP/C framework initialization
+	QF_init();
+	
+	QF_poolInit(l_smlPoolSto, sizeof(l_smlPoolSto), sizeof(l_smlPoolSto[0]));
+	// QF_poolInit(l_medPoolSto, sizeof(l_medPoolSto), sizeof(l_medPoolSto[0]));
+	
 	QF_psInit(subscrSto, Q_DIM(subscrSto));
-	
-	// init pushbutton, 1000ms for long press
-	// pushbutton_init(1000);
-	
-	// init int0 as interrupt
-	int0_init();
 
 	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 1, &xHandle);
 	
 	// TODO: initialise and start QF framework
-	
-	// Init and start ADC
-	ad_converter_init();	
 	ad_ctor();
 	CoffeeMachineAO_ctor();
 	MenuAO_ctor();
 	SetTimeAO_ctor();
 	
 	QActive_start((QActive *)adAO, 1, adQueueSto, Q_DIM(adQueueSto), (void *)0, 0, (QEvent *)0);
-	QActive_start(CoffeeMachineAOBase, 1, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
-	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
-	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);	
+// 	QActive_start(CoffeeMachineAOBase, 2, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
+// 	QActive_start(MenuAOBase, 3, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
+// 	QActive_start(SetTimeAOBase, 4, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);	
+
 	
-	vTaskStartScheduler();
+	// vTaskStartScheduler();
 	QF_run();
 }
 
