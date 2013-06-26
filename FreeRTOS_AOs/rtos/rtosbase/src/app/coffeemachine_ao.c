@@ -2,6 +2,7 @@
 
 #include "coffeemachine_ao.h"
 #include "events.h"
+#include "../drivers/rtc.h"
 #include "log.h"
 
 #define ALL_LEDS_OFF 0

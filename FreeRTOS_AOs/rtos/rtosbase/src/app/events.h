@@ -77,8 +77,7 @@ typedef struct
 typedef struct 
 {
   QEvent super;
-	uint8_t hours;
-	uint8_t min;
+	RTCTime time;
 } TimeSetEvt;
 
 /**

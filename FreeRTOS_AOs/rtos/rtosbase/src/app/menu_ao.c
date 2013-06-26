@@ -12,6 +12,7 @@
 #include "menu_ao.h"
 #include "settime_ao.h"
 #include "coffeemachine_ao.h"
+#include "../drivers/rtc.h"
 #include "events.h"
 
 // instance of MenuAO and opaque pointer
@@ -46,6 +47,10 @@ static QState MenuAO_initial(MenuAO *me, QEvent const *e)
 	QActive_subscribe(MenuAOBase, BUTTON_SHORTPRESS_SIG);
 	QActive_subscribe(MenuAOBase, BUTTON_LONGPRESS_SIG);
 	QActive_subscribe(MenuAOBase, AD_VALUE_SIG);
+	
+	// Initialize RTC
+	RTC_Init();
+	RTC_Start();
 	
 	return Q_TRAN(&MenuAO_ClockMenu);
 }
@@ -95,6 +100,7 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 		
 		case TIME_SET_SIG:
 		{
+			TimeSetEvt* evt = (TimeSetEvt*)e;
 			me->waitingForSetTime = false;
 			
 			// TODO display new time (1st row of LCD)
@@ -103,12 +109,17 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 			lcd_print("1: Clock XX:XX");
 			
 			// TODO save time at RTC
+			RTC_Stop();
+			RTC_SetTime(&evt->time);
+			RTC_Start();
 			
 			return Q_HANDLED();
 		}
 		
 		case TIME_UPDATE_SIG:
 		{
+			TimeUpdateEvt* evt = (TimeUpdateEvt*)e;
+			
 			// TODO display updated time
 			set_cursor(0, 0);
 			lcd_print("1: Clock XX:XX");
@@ -290,7 +301,13 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 		
 		case TIME_SET_SIG:
 		{
+			TimeSetEvt* evt = (TimeSetEvt*)e;
 			me->waitingForSetTime = false;
+			
+			// TODO save time at RTC
+			RTC_AlarmDisable();
+			RTC_SetAlarm(&evt->time);
+			RTC_AlarmEnable();
 			
 			// TODO display new alarm
 			lcd_clear();
