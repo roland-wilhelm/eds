@@ -97,4 +97,14 @@ typedef struct
   QEvent super;
 } AlarmEvt;
 
+/**
+ * ADValueChanged event (published each time ad value changed)
+ */
+typedef struct _AdValueChangedEvt {
+	
+	QEvent super;
+	uint16_t value;
+	
+} AdValueChangedEvt;
+
 #endif // EVENTS_H_

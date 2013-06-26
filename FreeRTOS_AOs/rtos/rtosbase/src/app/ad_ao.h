@@ -3,17 +3,7 @@
 
 #include "events.h"
 
-
 #define START_AD_CONVERSION_INTERVAL 100
-
-// AD_VALUE_CHANGED_SIG, published Signal each time ad value changed
-typedef struct _AdValueChangedEvt {
-	
-	QEvent super;
-	uint16_t value;
-	
-} AdValueChangedEvt;
-
 
 extern const QActive *adAO;
 

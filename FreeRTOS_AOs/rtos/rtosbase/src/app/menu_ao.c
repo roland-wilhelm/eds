@@ -209,7 +209,7 @@ static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e)
  **/
 static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 {
-	static BrewStrength brewStrength;
+	static BrewStrength tmpBrewStrength;
 	
 	switch ( e->sig ) 
 	{
@@ -219,13 +219,12 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 		}
 	      
 		case Q_ENTRY_SIG: 
-		{
-			sprintf(output, "SetStrength> %d", me->brewStrength);
-			
+		{		
 			// reset brew strength
-			brewStrength = Unchanged;
+			tmpBrewStrength = Unchanged;
 			
-			// TODO display change brew strength (2nd row of LCD)
+			// display change brew strength (2nd row of LCD)
+			sprintf(output, "SetStrength> %d", me->brewStrength);
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);
 			
@@ -245,24 +244,19 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 		}
 		
 		case AD_VALUE_SIG:
-		{
+		{		
 			// set brew strength according to AD value
-			
-			// TODO calculate and save brew strength
-			// ADValueEvt const* evt = (ADValueEvt*)e;
-			// short v = evt->value;
-			short v = 100;
 			
 			// calculate brew strenght:
 			// - ad value is from 0..100
 			// - multiplying by 2 and dividing by 100 scales between 0..2
 			// - adding 50 for correct rounding (integer-division)
 			
-			brewStrength = (BrewStrength)(((v * 2 + 50) / 100));
-			
-			sprintf(output, "SetStrength> %d", brewStrength);
-			
+			AdValueChangedEvt* evt = (AdValueChangedEvt*)e;
+			tmpBrewStrength = (BrewStrength)(((evt->value * 2 + 50) / 100));
+					
 			// display change brew strength (2nd row of LCD)
+			sprintf(output, "SetStrength> %d", tmpBrewStrength);
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);
 			
@@ -271,13 +265,13 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
-			if (brewStrength != Unchanged)
+			if (tmpBrewStrength != Unchanged)
 			{
 				// brew strength has been changed
-				me->brewStrength = brewStrength;
+				me->brewStrength = tmpBrewStrength;
 				
 				// TODO maybe better use dynamic event, but should be okay here!
-				l_BrewStrengthSetEvt.brewStrength = brewStrength;
+				l_BrewStrengthSetEvt.brewStrength = tmpBrewStrength;
 				
 				// send BREWSTRENGTH_SET_SIG to CoffeeMachineAO
 				QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
