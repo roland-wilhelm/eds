@@ -69,8 +69,8 @@ static QState MenuAO_initial(MenuAO *me, QEvent const *e)
 	QActive_subscribe(MenuAOBase, AD_VALUE_SIG);
 	
 	// Initialize RTC
-	RTC_Init();
-	RTC_Start();
+	//RTC_Init();
+	//RTC_Start();
 	
 	return Q_TRAN(&MenuAO_ClockMenu);
 }

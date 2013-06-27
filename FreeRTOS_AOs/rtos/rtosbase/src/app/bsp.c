@@ -10,12 +10,12 @@
 
 /* MCB2300 board specific initalisation, display and other go here */
 
-
 void BSP_Init(void )  {
 
   int i;
   
 //  init_ad( );
+	init_eth();
 
   uart_init_0();
 	LED_Init();
