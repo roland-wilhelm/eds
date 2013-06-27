@@ -28,6 +28,32 @@
 // List for publish-subscribe
 static QSubscrList subscrSto[MAX_PUB_SIG];
 
+// event queue for MenuAO
+static QEvent const *l_MenuAOEvtQSto[3];
+// event queue for CoffeeMachineAO
+static QEvent const *l_CoffeeMachineAOEvtQSto[3];
+// event queue for SetTimeAO
+static QEvent const *l_SetTimeAOEvtQSto[3];
+
+void my_sleep(portTickType ticks_sleep) {
+	
+	portTickType start = 0;
+	
+	start = xTaskGetTickCount();	
+	for(;;) {
+		
+		if( (xTaskGetTickCount() - start) <= ticks_sleep ) {
+			
+			taskYIELD();
+		}
+		else {
+			
+			break;
+		}		
+		
+	}
+	
+}
 
 void qftick_task( void * pvParameters )
 {
@@ -53,13 +79,15 @@ void qftick_task( void * pvParameters )
 			// increase timer 
       timestop = counter(xFrequency);
 		
+			//my_sleep(xFrequency);
+		
 			QF_tick();   		//QM Port
 		
-			if(count >= 100) {
-				start_ad_conversion();
-				count = 0;
-			}
-			count++;
+// 			if(count >= 100) {
+// 				start_ad_conversion();
+// 				count = 0;
+// 			}
+// 			count++;
 	}
 }
 
@@ -68,37 +96,35 @@ int main (void)
 {
 	xTaskHandle xHandle;
 	
-	// QP/C framework initialization
-	QF_init();
-	QF_psInit(subscrSto, Q_DIM(subscrSto));
-	
+			
 	// Hardware initialization
 	BSP_Init();
 	ad_converter_init();
 	int0_init(); // init int0 as interrupt for pushbutton
 	
+	// QP/C framework initialization
+	QF_init();
+	QF_psInit(subscrSto, Q_DIM(subscrSto));
+	
+	MenuAO_ctor();
+//	SetTimeAO_ctor();
+//	CoffeeMachineAO_ctor();
+	
 	// create tick task
-	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 0, &xHandle);
+	xTaskCreate(qftick_task, "QFTICK" , 100, NULL , 3, &xHandle);	
 
 	
-	// TODO: initialise and start QF framework
-
-	
-	// construct active objects
-// 	SetTimeAO_ctor();
-// 	MenuAO_ctor();
-// 	CoffeeMachineAO_ctor();
-	
-
-	
-// 	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	// construct active objects	
+//  	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
 //  	QActive_start(CoffeeMachineAOBase, 2, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
-//  	QActive_start(MenuAOBase, 3, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
-//  
+  	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
+  
+
+	vTaskStartScheduler();
  
 	
 	// run QF
-	QF_run();	// calls vTaskStartScheduler
+	//QF_run();	// calls vTaskStartScheduler
 }
 
 

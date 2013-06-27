@@ -1,4 +1,5 @@
 #include "events.h"
+#include <LPC23xx.H>
 
 #include "ad_ao.h"
 #include "log.h"
@@ -12,8 +13,7 @@ void ADC_IRQHandler(void) __irq {
 	unsigned int value_cur = (AD0DR0 >> 6) & 0x3FF;      /* Read Conversion Result */
 	
 	VICIntEnClr  = (1  << 18);                  /* Disable ADC Interrupt        */
-	// Wenn nachfolgend auskommentiert, kein aufruf mehr von IRQ
-	//vPortEnterCritical();
+	
 	value_cur = value_cur / 10.23;
 	
 	// Result converting from 0 to 100
@@ -27,14 +27,13 @@ void ADC_IRQHandler(void) __irq {
 		adValueEvt.value = value_cur;
 		value_old = value_cur;
 		//DBG("ADC value sent %d\n\r", value_old);
-		//QF_publish((QEvent *)&adValueEvt);
+		QF_publish((QEvent *)&adValueEvt);
 		
 	}
 
 	VICIntEnable  = (1  << 18);           /* Enable ADC Interrupt        */
   VICVectAddr = 0;                      /* Acknowledge Interrupt              */
 
-	//vPortExitCritical();
 }
 
 int ad_converter_init() {

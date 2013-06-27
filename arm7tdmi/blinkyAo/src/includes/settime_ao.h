@@ -14,7 +14,7 @@
 #define SETTIME_AO_H_
 
 #include "qf_pkg.h"
-#include "../drivers/rtc.h"
+#include "rtc.h"
 #include "events.h"
 
 // make opaque pointers available externally
