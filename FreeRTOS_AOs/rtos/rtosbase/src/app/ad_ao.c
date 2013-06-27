@@ -123,11 +123,13 @@ __irq void ADC_IRQHandler(void) {
 	DBG("ADC value %d", value_cur);
 	if(value_old != value_cur) {
 				
+		
  		static AdValueChangedEvt adValueEvt;
  		static const QEvent adQEvt = {AD_VALUE_SIG, 0};
  		adValueEvt.super = adQEvt;
 		adValueEvt.value = value_cur;
 		value_old = value_cur;
+		DBG("ADC value sent %d", value_old);
 		QF_publish((QEvent *)&adValueEvt);
 		
 	}
