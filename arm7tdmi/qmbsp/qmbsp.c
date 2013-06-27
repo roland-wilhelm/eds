@@ -15,17 +15,17 @@
 
 void BSP_Init( ) {
 
-
-  
+	int i;  
 
   Init_Timer1( );
   init_serial();                               /* Init UART                   */
   uart_init_0 ( );
   lcd_init();
   lcd_clear();
+  lcd_print ("GESCHISSE");
   set_cursor (0, 1);
-
-
+  lcd_print ("EventDrivenSystem");
+  for (i = 0; i < 10000; i++);       /* Wait for initial display           */
 
 
 }

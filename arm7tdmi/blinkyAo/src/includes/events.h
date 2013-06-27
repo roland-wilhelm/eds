@@ -9,7 +9,7 @@
 #define EVENTS_H_
 
 #include "qf_pkg.h"
-#include "../drivers/rtc.h"
+#include "rtc.h"
 
 
 #define SIZE_OF_EVENT_QUEUE 3

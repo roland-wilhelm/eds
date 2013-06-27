@@ -350,7 +350,7 @@
               <MiscControls></MiscControls>
               <Define>QF_TICK</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\mcb2300\include;..\qmbsp;C:\qm\qpc\ports\arm7tdmi\Keil\inc;C:\qm\qpc\qep\source;C:\qm\qpc\qf\source;C:\qm\qpc\include</IncludePath>
+              <IncludePath>..\..\mcb2300\include;..\qmbsp;C:\qm\qpc\ports\arm7tdmi\Keil\inc;C:\qm\qpc\qep\source;C:\qm\qpc\qf\source;C:\qm\qpc\include;.\src\includes</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -602,9 +602,39 @@
           <GroupName>src</GroupName>
           <Files>
             <File>
-              <FileName>blinky_ao.c</FileName>
+              <FileName>ad_ao.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\src\blinky_ao.c</FilePath>
+              <FilePath>.\src\ad_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>coffeemachine_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\coffeemachine_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>events.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\events.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\menu_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>push_button2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\push_button2.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtosbasicmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\rtosbasicmain.c</FilePath>
+            </File>
+            <File>
+              <FileName>settime_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\settime_ao.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -635,6 +665,16 @@
               <FileName>QEP_timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\mcb2300\drivers\QEP_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\drivers\rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\drivers\led.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1236,9 +1276,39 @@
           <GroupName>src</GroupName>
           <Files>
             <File>
-              <FileName>blinky_ao.c</FileName>
+              <FileName>ad_ao.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\src\blinky_ao.c</FilePath>
+              <FilePath>.\src\ad_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>coffeemachine_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\coffeemachine_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>events.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\events.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\menu_ao.c</FilePath>
+            </File>
+            <File>
+              <FileName>push_button2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\push_button2.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtosbasicmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\rtosbasicmain.c</FilePath>
+            </File>
+            <File>
+              <FileName>settime_ao.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\settime_ao.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1269,6 +1339,16 @@
               <FileName>QEP_timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\mcb2300\drivers\QEP_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\drivers\rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\drivers\led.c</FilePath>
             </File>
           </Files>
         </Group>

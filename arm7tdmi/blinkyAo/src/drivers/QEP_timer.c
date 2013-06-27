@@ -13,58 +13,18 @@
 
 #include "qp_port.h" 
 #include "lpc23xx.h"
-#include "push_button2.h"
 
-static unsigned int count = 0;
+int ad_start;
 
- __irq void T1_IRQHandler(void ) {
-	 
-#ifdef XXX
-			#ifdef QEP_TICK
+__irq void T1_IRQHandler(void ) {
+
+#ifdef QEP_TICK
  										/* ACK Timer1 int */
-	 
-	counter(1);	 
-		
-	if(count >= 100) {
-		AD0CR |= 0x01000000;
-		count = 0;
-	}
-	count++;
+	if ( ad_start) 
+	 AD0CR |= 0x01000000; 
 
     QF_tick();
-			#endif
-#endif 
-
-	
-	#ifdef QF_TICK
-#ifdef QK
- 	__disable_irq(); 
-  	  ++QK_intNest_; 
-#endif  
-
-	QF_INT_UNLOCK();
-										/* ACK Timer1 int */
-	counter(1);	 
-		
-	if(count >= 100) {
-		AD0CR |= 0x01000000;
-		count = 0;
-	}
-	count++;
-	
-	QF_tick();
-
-	QF_INT_LOCK(); 
-#ifdef QK 
-	   --QK_intNest_;
-	   if (   QK_intNest_ ==0) 
-	   		QK_schedule_();
 #endif
-		 
-#endif 
-	
-	
-	
 
 
 	
@@ -88,6 +48,13 @@ void Init_Timer1(void )	  {
   VICVectCntl5  = 15;                           /* use it for Timer1 Priority  */
   VICIntEnable  = (1  << 5);                   /* Enable Timer0 Interrupt     */
 
-  
+  ad_start=0;
+
 }
 
+
+start_ad() {
+
+ad_start=1;
+
+}

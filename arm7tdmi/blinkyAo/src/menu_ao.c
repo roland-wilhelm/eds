@@ -13,7 +13,7 @@
 #include "menu_ao.h"
 #include "settime_ao.h"
 #include "coffeemachine_ao.h"
-#include "../drivers/rtc.h"
+#include "rtc.h"
 #include "events.h"
 
 // MenuAO active object
@@ -68,8 +68,8 @@ static QState MenuAO_initial(MenuAO *me, QEvent const *e)
 	QActive_subscribe(MenuAOBase, AD_VALUE_SIG);
 	
 	// Initialize RTC
-	//RTC_Init();
-	//RTC_Start();
+// 	RTC_Init();
+// 	RTC_Start();
 	
 	return Q_TRAN(&MenuAO_ClockMenu);
 }
@@ -133,9 +133,9 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 			lcd_print((unsigned char*)output);
 			
 			// save time at RTC
-			RTC_Stop();
-			RTC_SetTime(&evt->time);
-			RTC_Start();
+// 			RTC_Stop();
+// 			RTC_SetTime(&evt->time);
+// 			RTC_Start();
 			
 			return Q_HANDLED();
 		}
