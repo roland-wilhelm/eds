@@ -6,17 +6,18 @@
 
 
 /* A/D IRQ: Executed when A/D Conversion is done                              */
-__irq void ADC_IRQHandler(void) {
+void ADC_IRQHandler(void) __irq {
 
 	static unsigned int value_old = 0;
 	unsigned int value_cur = (AD0DR0 >> 6) & 0x3FF;      /* Read Conversion Result */
 	
 	VICIntEnClr  = (1  << 18);                  /* Disable ADC Interrupt        */
-	
-	value_cur = value_cur / 10.2;
+	// Wenn nachfolgend auskommentiert, kein aufruf mehr von IRQ
+	//vPortEnterCritical();
+	value_cur = value_cur / 10.23;
 	
 	// Result converting from 0 to 100
-	printf("ADC %d\n\r", value_cur);
+	DBG("ADC %d\n\r", value_cur);
 	if(value_old != value_cur) {
 				
 		
@@ -25,14 +26,15 @@ __irq void ADC_IRQHandler(void) {
  		adValueEvt.super = adQEvt;
 		adValueEvt.value = value_cur;
 		value_old = value_cur;
-		//printf("ADC value sent %d\n\r", value_old);
-		QF_publish((QEvent *)&adValueEvt);
+		//DBG("ADC value sent %d\n\r", value_old);
+		//QF_publish((QEvent *)&adValueEvt);
 		
 	}
 
-	EXTINT = 0x01; 												// Clear the peripheral interrupt flag
 	VICIntEnable  = (1  << 18);           /* Enable ADC Interrupt        */
   VICVectAddr = 0;                      /* Acknowledge Interrupt              */
+
+	//vPortExitCritical();
 }
 
 int ad_converter_init() {

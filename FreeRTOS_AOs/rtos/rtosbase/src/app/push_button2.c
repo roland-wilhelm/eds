@@ -18,6 +18,10 @@ void isr_handler_eint0(void) __irq // for external interrupt 0
 	unsigned int diff=0;
 	
 	VICIntEnClr = (1 << 14); // Disable EINT0 in the VIC
+	
+	// Wenn nachfolgend auskommentiert, kein aufruf mehr von IRQ
+	//vPortEnterCritical ();
+	
 	if(EXTPOLAR == 0x00){ //falling edge
 		timestart=counter(0);
 		EXTPOLAR = 1; // next interrupt on falling edge
@@ -28,12 +32,12 @@ void isr_handler_eint0(void) __irq // for external interrupt 0
 		diff=timestop-timestart;
 		if(diff >= BUTTON_PRESSED_LONG_TIME){ 	//500msec
 			static const QEvent buttonLongEvt = {BUTTON_LONGPRESS_SIG, 0};
-			QF_publish(&buttonLongEvt);
+			//QF_publish(&buttonLongEvt);
 		}
 		else{
 			// time < BUTTON_PRESSED_LONG_TIME --> BUTTON_PRESSES_SHORT
 			static const QEvent buttonShortEvt = {BUTTON_SHORTPRESS_SIG, 0};
-			QF_publish(&buttonShortEvt);
+			//QF_publish(&buttonShortEvt);
 		}
 		
 		timestop = 0;
@@ -44,6 +48,8 @@ void isr_handler_eint0(void) __irq // for external interrupt 0
 	EXTINT = 0x01; // Clear the peripheral interrupt flag
 	VICIntEnable = (1 << 14); // Enable EINT0 in the VIC
 	VICVectAddr = 0; // Acknowledge Interrupt
+	
+	//vPortExitCritical ();
 }
 
 void int0_init(void)
@@ -56,7 +62,8 @@ void int0_init(void)
 	VICVectAddr14 = (unsigned) isr_handler_eint0;
 	// Interrupt 1 rising edge - 0 is falling edge
 	EXTPOLAR = 0x00;
-
+	// P2.10 is input
+	FIO2DIR &= ( 0xffffffff^(1 << 10) );
 	// Clear the peripheral interrupt flag
 	EXTINT = 0x01;
 	// Enable EINT0

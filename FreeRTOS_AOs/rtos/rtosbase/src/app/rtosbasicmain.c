@@ -35,7 +35,7 @@ void qftick_task( void * pvParameters )
 	
 	// 1 Tick = 1,25 ms
 	// 100 Ticks = 125 ms
-	const portTickType xFrequency = 1;
+	const portTickType xFrequency = 10;
 	static unsigned int timestop = 0, timestart = 0;
 	
 	
@@ -44,20 +44,22 @@ void qftick_task( void * pvParameters )
   timestart = counter(0);
 	// Task code goes here.
 	for( ;; ) {
-        
+      
+			static count = 0;
+		
 			// Wait for the next cycle.
 			vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
 			// increase timer 
-      timestop = counter(1);
+      timestop = counter(xFrequency);
 		
 			QF_tick();   		//QM Port
 		
-			if( (timestop - timestart) >= 100 ) {
-				
+			if(count >= 100) {
 				start_ad_conversion();
-				timestart = timestop;
+				count = 0;
 			}
+			count++;
 	}
 }
 
@@ -66,15 +68,15 @@ int main (void)
 {
 	xTaskHandle xHandle;
 	
+	// QP/C framework initialization
+	QF_init();
+	QF_psInit(subscrSto, Q_DIM(subscrSto));
+	
 	// Hardware initialization
 	BSP_Init();
 	ad_converter_init();
 	int0_init(); // init int0 as interrupt for pushbutton
 	
-	// QP/C framework initialization
-	QF_init();
-	QF_psInit(subscrSto, Q_DIM(subscrSto));
-
 	// create tick task
 	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 0, &xHandle);
 
@@ -83,16 +85,16 @@ int main (void)
 
 	
 	// construct active objects
-	SetTimeAO_ctor();
-	MenuAO_ctor();
-	CoffeeMachineAO_ctor();
+// 	SetTimeAO_ctor();
+// 	MenuAO_ctor();
+// 	CoffeeMachineAO_ctor();
 	
 
 	
-	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
- 	QActive_start(CoffeeMachineAOBase, 2, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
- 	QActive_start(MenuAOBase, 3, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
- 
+// 	QActive_start(SetTimeAOBase, 1, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
+//  	QActive_start(CoffeeMachineAOBase, 2, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
+//  	QActive_start(MenuAOBase, 3, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
+//  
  
 	
 	// run QF
