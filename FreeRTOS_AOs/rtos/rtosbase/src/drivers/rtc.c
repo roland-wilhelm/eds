@@ -24,17 +24,19 @@ static TimeUpdateEvt l_TimeUpdateEvt = {{TIME_UPDATE_SIG}};
  */
 void RTC_Init( void )
 {
- 
-	RTC_AMR = 0;	// Alarm mask register
-  RTC_CIIR = 0;	// Counter increment interrupt register
-  RTC_CCR = 0;	// Clock control register (disable)
-	RTC_CISS = 0;	// SubSecondInterrupt disable
   RTC_PREINT = PREINT_RTC; // RTC clock integer divider
   RTC_PREFRAC = PREFRAC_RTC; // RTC clock fraction divider
+  PCONP |= 0x200; // Enable power for RTC
+  RTC_AMR = 0;	// Alarm mask register
+  RTC_CIIR = 0;	// Counter increment interrupt register
+  RTC_CCR = 0;	// Clock control register (disable)
+  RTC_ILR = 0xFF; // Clear RTC interrupt register
+  RTC_CISS = 0;	// SubSecondInterrupt disable
 	
   VICVectAddr13  		= (unsigned long)RTCHandler;		// set IRQ handler
-  VICVectPriority13  = 15;		// use it for RTC interrupt
-  VICIntEnable  		= (1 << 13);	// enable RTC Interrupt	
+  VICVectCntl13 = 13; // use it for RTC Interrupt
+  VICVectPriority13  = 12;		// use it for RTC interrupt
+  VICIntEnable  		= (1 << 13);	// enable RTC Interrupt
 }
 
 /* Starts RTC clock

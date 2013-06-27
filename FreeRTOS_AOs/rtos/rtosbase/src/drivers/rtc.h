@@ -8,8 +8,8 @@
 #ifndef RTC_H_
 #define RTC_H_
 
-#define PREINT_RTC	0x000001C8  // RTC Clock prescaler integer PCLK = 15Mhz
-#define PREFRAC_RTC	0x000061C0  // RTC Clock prescaler fraction PCLK = 15Mhz
+#define PREINT_RTC	0x016d  // RTC Clock prescaler integer PCLK
+#define PREFRAC_RTC	0x1680  // RTC Clock prescaler fraction PCLK
 						
 typedef struct {
     unsigned char RTC_Min;     // Minutes
