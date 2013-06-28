@@ -70,7 +70,7 @@ void QF_onCleanup(void)	  {
 
 void QF_onIdle(void)	  {
 
-	__enable_irq();
+	
 	 ;
 
 	 }

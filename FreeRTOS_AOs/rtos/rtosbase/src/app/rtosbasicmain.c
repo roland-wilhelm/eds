@@ -24,7 +24,7 @@
 #include "settime_ao.h"
 
 
-#define SIZE_OF_EVENT_QUEUE 32
+#define SIZE_OF_EVENT_QUEUE 5
 
 
 // List for publish-subscribe
@@ -110,10 +110,10 @@ int main (void)
 	CoffeeMachineAO_ctor();
 
 	// start active objects	
- 	QActive_start(MenuAOBase, 1, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
- 	QActive_start(SetTimeAOBase, 2, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
- 	QActive_start(CoffeeMachineAOBase, 3, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
-  
+ 	QActive_start(SetTimeAOBase, 1, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
+ 	QActive_start(CoffeeMachineAOBase, 2, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
+	// Muss hier stehen, da init QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
+  QActive_start(MenuAOBase, 3, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
   
 	// run QF
 	QF_run();	// calls vTaskStartScheduler
