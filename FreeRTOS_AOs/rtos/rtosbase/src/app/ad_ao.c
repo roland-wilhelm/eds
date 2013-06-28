@@ -13,7 +13,7 @@ void ADC_IRQHandler(void) __irq {
 	
 	VICIntEnClr  = (1  << 18);                  /* Disable ADC Interrupt        */
 	// Wenn nachfolgend auskommentiert, kein aufruf mehr von IRQ
-	//vPortEnterCritical();
+	vPortEnterCritical();
 	value_cur = value_cur / 10.23;
 	
 	// Result converting from 0 to 100
@@ -27,14 +27,14 @@ void ADC_IRQHandler(void) __irq {
 		adValueEvt.value = value_cur;
 		value_old = value_cur;
 		//DBG("ADC value sent %d\n\r", value_old);
-		//QF_publish((QEvent *)&adValueEvt);
+		QF_publish((QEvent *)&adValueEvt);
 		
 	}
 
 	VICIntEnable  = (1  << 18);           /* Enable ADC Interrupt        */
   VICVectAddr = 0;                      /* Acknowledge Interrupt              */
 
-	//vPortExitCritical();
+	vPortExitCritical();
 }
 
 int ad_converter_init() {
@@ -45,7 +45,7 @@ int ad_converter_init() {
   AD0INTEN      = (1 <<  0);                   /* CH0 enable interrupt        */
   AD0CR         = 0x00200301;                  /* Power up, PCLK/4, sel AD0.0 */
   VICVectAddr18 = (unsigned long)ADC_IRQHandler;/* Set Interrupt Vector       */
-  VICVectCntl18 = 14;                          /* use it for ADC Interrupt    */
+  VICVectPriority18 = 11;                          /* use it for ADC Interrupt    */
   VICIntEnable  = (1  << 18);                  /* Enable ADC Interrupt        */
 	
 	return 0;

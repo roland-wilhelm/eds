@@ -14,16 +14,16 @@ void BSP_Init(void )  {
 
   int i;
   
-//  init_ad( );
+
 	init_eth();
 
   uart_init_0();
 	LED_Init();
   lcd_init();
   lcd_clear();
-  lcd_print ("QM FreeRTOS BASE");
+  lcd_print ("GESCHISSE");
   set_cursor (0, 1);
-  lcd_print ("EventDrivenSystem");
+  lcd_print ("EDS");
   for (i = 0; i < 10000; i++);       /* Wait for initial display           */
 
 }

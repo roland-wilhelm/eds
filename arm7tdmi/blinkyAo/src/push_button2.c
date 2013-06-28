@@ -64,6 +64,8 @@ void int0_init(void)
 	FIO2DIR &= ( 0xffffffff^(1 << 10) );
 	// Clear the peripheral interrupt flag
 	EXTINT = 0x01;
+	// Priority
+	VICVectPriority14 = 11;
 	// Enable EINT0
 	VICIntEnable = (1 << 14);
 }

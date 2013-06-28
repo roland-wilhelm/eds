@@ -20,7 +20,7 @@ void isr_handler_eint0(void) __irq // for external interrupt 0
 	VICIntEnClr = (1 << 14); // Disable EINT0 in the VIC
 	
 	// Wenn nachfolgend auskommentiert, kein aufruf mehr von IRQ
-	//vPortEnterCritical ();
+	vPortEnterCritical ();
 	
 	if(EXTPOLAR == 0x00){ //falling edge
 		timestart=counter(0);
@@ -50,7 +50,7 @@ void isr_handler_eint0(void) __irq // for external interrupt 0
 	VICIntEnable = (1 << 14); // Enable EINT0 in the VIC
 	VICVectAddr = 0; // Acknowledge Interrupt
 	
-	//vPortExitCritical ();
+	vPortExitCritical ();
 }
 
 void int0_init(void)
@@ -67,6 +67,8 @@ void int0_init(void)
 	FIO2DIR &= ( 0xffffffff^(1 << 10) );
 	// Clear the peripheral interrupt flag
 	EXTINT = 0x01;
+	// Priority
+	VICVectPriority14 = 12;
 	// Enable EINT0
 	VICIntEnable = (1 << 14);
 }

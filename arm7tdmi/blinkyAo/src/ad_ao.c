@@ -44,7 +44,7 @@ int ad_converter_init() {
   AD0INTEN      = (1 <<  0);                   /* CH0 enable interrupt        */
   AD0CR         = 0x00200301;                  /* Power up, PCLK/4, sel AD0.0 */
   VICVectAddr18 = (unsigned long)ADC_IRQHandler;/* Set Interrupt Vector       */
-  VICVectCntl18 = 14;                          /* use it for ADC Interrupt    */
+  VICVectCntl18 = 12;                          /* use it for ADC Interrupt    */
   VICIntEnable  = (1  << 18);                  /* Enable ADC Interrupt        */
 	
 	return 0;

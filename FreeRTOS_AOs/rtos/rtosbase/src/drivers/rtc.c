@@ -12,7 +12,7 @@
 #include "rtc.h"
 
 
-__irq void RTCHandler (void);
+void RTCHandler(void) __irq;
 
 // static events
 static AlarmEvt l_AlarmEvt = {{ALARM_SIG}};
@@ -34,8 +34,7 @@ void RTC_Init( void )
   RTC_CISS = 0;	// SubSecondInterrupt disable
 	
   VICVectAddr13  		= (unsigned long)RTCHandler;		// set IRQ handler
-  VICVectCntl13 = 13; // use it for RTC Interrupt
-  VICVectPriority13  = 12;		// use it for RTC interrupt
+  VICVectPriority13  = 10;		// use it for RTC interrupt
   VICIntEnable  		= (1 << 13);	// enable RTC Interrupt
 }
 
@@ -124,7 +123,7 @@ void RTC_AlarmDisable( void )
 /* RTC irq handler
  * (Interrupts for change of minutes and for alarm are handled
  */
-__irq void RTCHandler (void)
+void RTCHandler(void) __irq 
 {  
 	// Counter increment interrupt
 	if((RTC_ILR & ILR_RTCCIF) == 1) {

@@ -32,7 +32,7 @@ void RTC_Init( void )
   RTC_PREFRAC = PREFRAC_RTC; // RTC clock fraction divider
 	
   VICVectAddr13  		= (unsigned long)RTCHandler;		// set IRQ handler
-  VICVectPriority13  = 15;		// use it for RTC interrupt
+  VICVectPriority13  = 10;		// use it for RTC interrupt
   VICIntEnable  		= (1 << 13);	// enable RTC Interrupt	
 }
 

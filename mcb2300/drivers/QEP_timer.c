@@ -85,7 +85,7 @@ void Init_Timer1(void )	  {
   T1MCR         = 3;                           /* Interrupt and Reset on MR0  */
   T1TCR         = 1;                           /* Timer0 Enable               */
   VICVectAddr5  = (unsigned long)T1_IRQHandler;/* Set Interrupt Vector        */
-  VICVectCntl5  = 15;                           /* use it for Timer1 Priority  */
+  VICVectPriority5  = 15;                           /* use it for Timer1 Priority  */
   VICIntEnable  = (1  << 5);                   /* Enable Timer0 Interrupt     */
 
   

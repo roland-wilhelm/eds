@@ -24,7 +24,7 @@ void BSP_Init( ) {
   lcd_clear();
   lcd_print ("GESCHISSE");
   set_cursor (0, 1);
-  lcd_print ("EventDrivenSystem");
+  lcd_print ("EDS");
   for (i = 0; i < 10000; i++);       /* Wait for initial display           */
 
 

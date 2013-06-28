@@ -28,11 +28,12 @@
 static QSubscrList subscrSto[MAX_PUB_SIG];
 
 // event queue for MenuAO
-static QEvent const *l_MenuAOEvtQSto[3];
+static const QEvent *l_MenuAOEvtQSto[3];
 // event queue for CoffeeMachineAO
-static QEvent const *l_CoffeeMachineAOEvtQSto[3];
+static const QEvent *l_CoffeeMachineAOEvtQSto[3];
 // event queue for SetTimeAO
-static QEvent const *l_SetTimeAOEvtQSto[3];
+static const QEvent *l_SetTimeAOEvtQSto[3];
+
 
 void my_sleep(portTickType ticks_sleep) {
 	
@@ -61,32 +62,31 @@ void qftick_task( void * pvParameters )
 	// 1 Tick = 1,25 ms
 	// 100 Ticks = 125 ms
 	const portTickType xFrequency = 10;
-	static unsigned int timestop = 0, timestart = 0;
-	
+		
 	
   // Initialise the xLastWakeTime variable with the current time.
 	xLastWakeTime = xTaskGetTickCount();
-  timestart = counter(0);
+ 
 	// Task code goes here.
 	for( ;; ) {
       
-			static count = 0;
+			static unsigned int count = 0;
 		
 			// Wait for the next cycle.
 			vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
 			// increase timer 
-      timestop = counter(xFrequency);
+      counter(xFrequency);
 		
 			//my_sleep(xFrequency);
 		
 			QF_tick();   		//QM Port
 		
-// 			if(count >= 100) {
-// 				start_ad_conversion();
-// 				count = 0;
-// 			}
-// 			count++;
+			if(count >= 10) {
+				start_ad_conversion();
+				count = 0;
+			}
+			count++;
 	}
 }
 
@@ -107,19 +107,19 @@ int main (void)
 
 
 	// create tick task
-	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 1, &xHandle);
+	xTaskCreate(qftick_task, "QFTICK" , 0x100, NULL , 0, &xHandle);
 	
 	// construct active objects
 	
-	SetTimeAO_ctor();
 	MenuAO_ctor();
+	SetTimeAO_ctor();
 	CoffeeMachineAO_ctor();
 
 	
 	// construct active objects	
 	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
-//  	QActive_start(SetTimeAOBase, 2, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
-//  	QActive_start(CoffeeMachineAOBase, 3, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
+ 	QActive_start(SetTimeAOBase, 2, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
+ 	QActive_start(CoffeeMachineAOBase, 3, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
   	
   
 
