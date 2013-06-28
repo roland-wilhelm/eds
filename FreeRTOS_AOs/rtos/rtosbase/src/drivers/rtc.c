@@ -37,9 +37,10 @@ void RTC_Init( void )
   RTC_CIIR = 0x01;	// Counter increment interrupt register
   RTC_CCR = 0x01;	// Clock control register (disable)
 	
+	VICIntSelect      &= ~(1<<13);
   VICVectAddr13  		= (unsigned long)RTCHandler;		// set IRQ handler
-  VICVectCntl13 = 13; /* use it for RTC Interrupt */
-  VICIntEnable  		= (1 << 13);	// enable RTC Interrupt
+  VICVectPriority13 = 0; /* use it for RTC Interrupt */
+  VICIntEnable  		|= (1 << 13);	// enable RTC Interrupt
 }
 
 /* Starts RTC clock
@@ -140,7 +141,8 @@ void RTCHandler(void) __irq
 	}
 	// Alarm interrupt
 	if((RTC_ILR & ILR_RTCALF)) {
-		QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_AlarmEvt);
+		QF_publish((QEvent *)&l_AlarmEvt);
+		
 		RTC_ILR |= ILR_RTCALF;		// clear interrupt flag		
 	}
 	RTC_ILR = 0;

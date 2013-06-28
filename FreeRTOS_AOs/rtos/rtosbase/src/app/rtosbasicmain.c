@@ -110,11 +110,10 @@ int main (void)
 	SetTimeAO_ctor();
 	CoffeeMachineAO_ctor();
 
-	// start active objects	
+	// start active objects
+	QActive_start(CoffeeMachineAOBase, 3, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
+	QActive_start(SetTimeAOBase, 2, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
 	QActive_start(MenuAOBase, 1, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
- 	QActive_start(SetTimeAOBase, 2, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
- 	QActive_start(CoffeeMachineAOBase, 3, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
-  	
   
 	// run QF
 	QF_run();	// calls vTaskStartScheduler

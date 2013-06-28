@@ -20,7 +20,6 @@ void ADC_IRQHandler(void) __irq {
 	DBG("ADC %d\n\r", value_cur);
 	if(value_old != value_cur) {
 				
-		
  		static AdValueChangedEvt adValueEvt;
  		static QEvent adQEvt = {AD_VALUE_SIG, 0};
  		adValueEvt.super = adQEvt;

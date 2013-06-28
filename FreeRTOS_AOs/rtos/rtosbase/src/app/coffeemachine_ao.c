@@ -14,8 +14,6 @@
 static CoffeeMachineAO l_CoffeeMachineAO;
 QActive* const CoffeeMachineAOBase = (QActive*)&l_CoffeeMachineAO;
 
-
-
 // prototypes
 static QState CoffeeMachineAO_initial(CoffeeMachineAO *me, QEvent const *e);
 static QState CoffeeMachineAO_Idle(CoffeeMachineAO *me, QEvent const *e);
@@ -35,7 +33,9 @@ void CoffeeMachineAO_ctor(void)
 **/
 static QState CoffeeMachineAO_initial(CoffeeMachineAO *me, QEvent const *e)
 {
-	 return Q_TRAN(&CoffeeMachineAO_Idle);
+	QActive_subscribe((QActive *)me, ALARM_SIG);
+	
+	return Q_TRAN(&CoffeeMachineAO_Idle);
 }
 
 /**
@@ -85,7 +85,6 @@ static QState CoffeeMachineAO_Idle(CoffeeMachineAO *me, QEvent const *e)
 		 case Q_EXIT_SIG:
 		 {
 			 DBG("CoffeeMachine Idle: EXIT");
-			 return Q_HANDLED();
 		 }
 	 }
 	 
@@ -109,6 +108,7 @@ static QState CoffeeMachineAO_Brewing(CoffeeMachineAO *me, QEvent const *e)
 		 {
 			 DBG("CoffeeMachine Brewing: ENTRY");
 			 QActive_subscribe((QActive *)me, BUTTON_SHORTPRESS_SIG);
+			 return Q_HANDLED();
 		 }
 		 
 		 case BUTTON_SHORTPRESS_SIG:

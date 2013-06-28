@@ -24,6 +24,7 @@ enum CoffeeAlarmSignals
 	BUTTON_LONGPRESS_SIG,
 	// ad_ao: published Signal each time ad value changed
 	AD_VALUE_SIG,
+	ALARM_SIG,
 	
 	// end of published signals
 	MAX_PUB_SIG,
@@ -31,7 +32,6 @@ enum CoffeeAlarmSignals
 	// start pushed signals
 	TIME_UPDATE_SIG,
 	TIME_SET_SIG,
-	ALARM_SIG,
 	ENTER_SET_TIME_SIG,
 	BREWSTRENGTH_SET_SIG,
 	
