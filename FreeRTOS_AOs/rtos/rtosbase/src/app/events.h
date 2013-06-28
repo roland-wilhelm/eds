@@ -12,10 +12,6 @@
 #include "../drivers/rtc.h"
 
 
-#define SIZE_OF_EVENT_QUEUE 3
-
-
-
 /**
  * signals enumeration
  **/

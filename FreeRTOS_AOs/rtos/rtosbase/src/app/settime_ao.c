@@ -129,8 +129,8 @@ static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e)
 			QActive_unsubscribe(SetTimeAOBase, BUTTON_LONGPRESS_SIG);
 			QActive_unsubscribe(SetTimeAOBase, AD_VALUE_SIG);
 			
-			// long press > leave changing state and go back to Idle (Superstate)
-			return Q_SUPER(&SetTimeAO_Idle);
+			// long press > leave changing state and go back to Idle
+			return Q_TRAN(&SetTimeAO_Idle);
 		}
 	 	
 		case Q_EXIT_SIG: 

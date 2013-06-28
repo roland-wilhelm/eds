@@ -24,15 +24,11 @@
 #include "settime_ao.h"
 
 
+#define SIZE_OF_EVENT_QUEUE 32
+
+
 // List for publish-subscribe
 static QSubscrList subscrSto[MAX_PUB_SIG];
-
-// event queue for MenuAO
-static const QEvent *l_MenuAOEvtQSto[3];
-// event queue for CoffeeMachineAO
-static const QEvent *l_CoffeeMachineAOEvtQSto[3];
-// event queue for SetTimeAO
-static const QEvent *l_SetTimeAOEvtQSto[3];
 
 
 void my_sleep(portTickType ticks_sleep) {
@@ -110,25 +106,18 @@ int main (void)
 	xTaskCreate(qftick_task, "QFTICK" , 0x100, NULL , 0, &xHandle);
 	
 	// construct active objects
-	
 	MenuAO_ctor();
 	SetTimeAO_ctor();
 	CoffeeMachineAO_ctor();
 
-	
-	// construct active objects	
-	QActive_start(MenuAOBase, 1, l_MenuAOEvtQSto, Q_DIM(l_MenuAOEvtQSto), (void*)0, 0, (QEvent*)0);
- 	QActive_start(SetTimeAOBase, 2, l_SetTimeAOEvtQSto, Q_DIM(l_SetTimeAOEvtQSto), (void*)0, 0, (QEvent*)0);
- 	QActive_start(CoffeeMachineAOBase, 3, l_CoffeeMachineAOEvtQSto, Q_DIM(l_CoffeeMachineAOEvtQSto), (void*)0, 0, (QEvent*)0);
+	// start active objects	
+	QActive_start(MenuAOBase, 1, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
+ 	QActive_start(SetTimeAOBase, 2, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
+ 	QActive_start(CoffeeMachineAOBase, 3, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
   	
   
-
-	vTaskStartScheduler();
- 
-
-	
 	// run QF
-	//QF_run();	// calls vTaskStartScheduler
+	QF_run();	// calls vTaskStartScheduler
 }
 
 

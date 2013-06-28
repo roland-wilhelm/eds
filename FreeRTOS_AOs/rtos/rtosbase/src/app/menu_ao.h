@@ -15,7 +15,6 @@
 
 // make opaque pointers available externally
 extern QActive* const MenuAOBase;
-//extern QEvent const *l_MenuAOEvtQSto[SIZE_OF_EVENT_QUEUE];
 
 // constructor
 void MenuAO_ctor(void);

@@ -28,8 +28,6 @@ typedef struct MenuAOTag {
 static MenuAO l_MenuAO;
 QActive* const MenuAOBase = (QActive*)&l_MenuAO;
 
-
-
 // static events
 static BrewStrengthSetEvt l_BrewStrengthSetEvt = {{BREWSTRENGTH_SET_SIG}};
 static EnterSetTimeEvt l_EnterSetTimeEvt = {{ENTER_SET_TIME_SIG}};
@@ -90,9 +88,9 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 		{
 			// get current time
 			RTC_GetTime(&rtcTime);
-			sprintf(output, "1: Clock %2d:%2d", rtcTime.RTC_Hour, rtcTime.RTC_Min);
 			
 			// display clock menu (1st row of LCD)
+			sprintf(output, "1: Clock %2d:%2d", rtcTime.RTC_Hour, rtcTime.RTC_Min);
 			lcd_clear();
 			set_cursor(0, 0);
 			lcd_print((unsigned char*)output);
@@ -112,11 +110,14 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 		
 		case BUTTON_LONGPRESS_SIG: 
 		{
-			// long press > send change time request and wait for response
-			me->waitingForSetTime = true;
-			
-			// send ENTER_SET_TIME_SIG to SetTimeAO
-			QActive_postFIFO(SetTimeAOBase, (QEvent*)&l_EnterSetTimeEvt);
+			if (me->waitingForSetTime != true)
+			{
+				// long press > send change time request and wait for response
+				me->waitingForSetTime = true;
+				
+				// send ENTER_SET_TIME_SIG to SetTimeAO
+				QActive_postFIFO(SetTimeAOBase, (QEvent*)&l_EnterSetTimeEvt);
+			}
 			
 			return Q_HANDLED();
 		}
@@ -174,9 +175,8 @@ static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e)
 	      
 		case Q_ENTRY_SIG: 
 		{
+			// display brew strength menu (1st row of LCD)
 			sprintf(output, "2: Strength %d", me->brewStrength);
-			
-			// TODO display brew strength menu (1st row of LCD)
 			lcd_clear();
 			set_cursor(0, 0);
 			lcd_print((unsigned char*)output);
@@ -274,6 +274,12 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 				
 				// send BREWSTRENGTH_SET_SIG to CoffeeMachineAO
 				QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
+			
+				// display brew strength menu (1st row of LCD)
+				sprintf(output, "2: Strength %d", me->brewStrength);
+				lcd_clear();
+				set_cursor(0, 0);
+				lcd_print((unsigned char*)output);
 			}
 		} 	
 	}
@@ -312,18 +318,21 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 			// short press > proceed to next submenu
 			if (!me->waitingForSetTime)
 				// guard condition: only if not waiting for set time
-				return Q_TRAN(&MenuAO_BrewStrengthMenu);
+				return Q_TRAN(&MenuAO_ClockMenu);
 			else
 				return Q_HANDLED();
 		}
 		
 		case BUTTON_LONGPRESS_SIG: 
 		{ 
-			// long press > send change time request and wait for response
-			me->waitingForSetTime = true;
-			
-			// send ENTER_SET_TIME_SIG to SetTimeAO
-			QActive_postFIFO(SetTimeAOBase, (QEvent*)&l_EnterSetTimeEvt);
+			if (me->waitingForSetTime != true)
+			{
+				// long press > send change time request and wait for response
+				me->waitingForSetTime = true;
+				
+				// send ENTER_SET_TIME_SIG to SetTimeAO
+				QActive_postFIFO(SetTimeAOBase, (QEvent*)&l_EnterSetTimeEvt);
+			}
 			
 			return Q_HANDLED();
 		}
