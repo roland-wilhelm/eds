@@ -58,19 +58,14 @@ void qftick_task( void * pvParameters )
 	// 1 Tick = 1,25 ms
 	// 100 Ticks = 125 ms
 	const portTickType xFrequency = 10;
-		
-	
-  // Initialise the xLastWakeTime variable with the current time.
-	xLastWakeTime = xTaskGetTickCount();
  
 	// Task code goes here.
-	for( ;; ) {
-      
+	for( ;; ) {      
+			
 			static unsigned int count = 0;
 		
-			// Wait for the next cycle.
-			vTaskDelayUntil(&xLastWakeTime, xFrequency);
-
+			xLastWakeTime = xTaskGetTickCount();
+			
 			// increase timer 
       counter(xFrequency);
 		
@@ -83,6 +78,12 @@ void qftick_task( void * pvParameters )
 				count = 0;
 			}
 			count++;
+		
+		// Wait for the next cycle.
+			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+			
+			
 	}
 }
 
@@ -103,7 +104,7 @@ int main (void)
 
 
 	// create tick task
-	xTaskCreate(qftick_task, "QFTICK" , 0x100, NULL , 0, &xHandle);
+	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 0, &xHandle);
 	
 	// construct active objects
 	MenuAO_ctor();
@@ -111,7 +112,7 @@ int main (void)
 	CoffeeMachineAO_ctor();
 
 	// start active objects	
-	QActive_start(MenuAOBase, 1, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
+ 	QActive_start(MenuAOBase, 1, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
  	QActive_start(SetTimeAOBase, 2, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
  	QActive_start(CoffeeMachineAOBase, 3, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
   	

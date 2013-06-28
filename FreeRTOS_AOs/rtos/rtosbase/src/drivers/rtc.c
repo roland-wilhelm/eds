@@ -125,6 +125,9 @@ void RTC_AlarmDisable( void )
  */
 void RTCHandler(void) __irq 
 {  
+	
+	QF_INT_LOCK();
+	
 	// Counter increment interrupt
 	if((RTC_ILR & ILR_RTCCIF) == 1) {
 		l_TimeUpdateEvt.time.RTC_Hour = RTC_HOUR;
@@ -138,6 +141,9 @@ void RTCHandler(void) __irq
 		QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_AlarmEvt);
 		RTC_ILR |= ILR_RTCALF;		// clear interrupt flag		
 	}
+	
+	QF_INT_UNLOCK();
+	
 	RTC_ILR = 0;
   VICVectAddr = 0;	// acknowledge interrupt
 }

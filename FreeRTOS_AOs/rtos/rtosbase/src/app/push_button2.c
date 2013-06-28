@@ -12,15 +12,18 @@ int counter(int incr){
 	return counter;
 }
 
+static unsigned int timestop=0, timestart=0;
+static unsigned int diff=0;
 void isr_handler_eint0(void) __irq // for external interrupt 0
 {
-	static unsigned int timestop=0, timestart=0;
-	unsigned int diff=0;
 	
-	VICIntEnClr = (1 << 14); // Disable EINT0 in the VIC
+	
+	QF_INT_LOCK();
+	
+	//VICIntEnClr = (1 << 14); // Disable EINT0 in the VIC
 	
 	// Wenn nachfolgend auskommentiert, kein aufruf mehr von IRQ
-	vPortEnterCritical ();
+	
 	
 	if(EXTPOLAR == 0x00){ //falling edge
 		timestart=counter(0);
@@ -44,13 +47,13 @@ void isr_handler_eint0(void) __irq // for external interrupt 0
 		timestop = 0;
 		timestart = 0;
 	}
-	
+	QF_INT_UNLOCK();
 
 	EXTINT = 0x01; // Clear the peripheral interrupt flag
-	VICIntEnable = (1 << 14); // Enable EINT0 in the VIC
+	//VICIntEnable = (1 << 14); // Enable EINT0 in the VIC
 	VICVectAddr = 0; // Acknowledge Interrupt
 	
-	vPortExitCritical ();
+	
 }
 
 void int0_init(void)

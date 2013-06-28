@@ -6,7 +6,8 @@
 #include <LPC23xx.H> 
 #include <stdio.h>
 #include <stdlib.h>   
-
+#include "ad_ao.h"
+#include "push_button2.h"
 
 /* MCB2300 board specific initalisation, display and other go here */
 
@@ -69,13 +70,12 @@ void QF_onCleanup(void)	  {
 
 void QF_onIdle(void)	  {
 
-	
+	__enable_irq();
 	 ;
 
 	 }
 void QF_onStartup(void)	  {
 
-	
-	 ;
+	;
 
-	 }
+}
