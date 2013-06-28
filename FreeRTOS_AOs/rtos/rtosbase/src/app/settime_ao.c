@@ -90,7 +90,6 @@ static QState SetTimeAO_Idle(SetTimeAO *me, QEvent const *e)
 			 	
 		case Q_EXIT_SIG: 
 		{
-			return Q_HANDLED();
 		} 	
 	}
  
@@ -140,8 +139,6 @@ static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e)
 			l_TimeSetEvt.time.RTC_Hour = l_SetTimeAO.time.RTC_Hour;
 			//TODO: MenuAO not declared...
 			QActive_postFIFO(MenuAOBase, (QEvent*)&l_TimeSetEvt);
-			
-			return Q_HANDLED();
 		} 	
 	}
  
@@ -215,7 +212,6 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
-			return Q_HANDLED();
 		} 	
 	}
 	
@@ -290,7 +286,6 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
-			return Q_HANDLED();
 		} 	
 	}
  

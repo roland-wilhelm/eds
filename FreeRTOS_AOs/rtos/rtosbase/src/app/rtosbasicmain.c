@@ -80,9 +80,7 @@ void qftick_task( void * pvParameters )
 			count++;
 		
 		// Wait for the next cycle.
-			vTaskDelayUntil(&xLastWakeTime, xFrequency);
-
-			
+			vTaskDelayUntil(&xLastWakeTime, xFrequency);			
 			
 	}
 }
@@ -115,7 +113,7 @@ int main (void)
  	QActive_start(MenuAOBase, 1, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
  	QActive_start(SetTimeAOBase, 2, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
  	QActive_start(CoffeeMachineAOBase, 3, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
-  	
+  
   
 	// run QF
 	QF_run();	// calls vTaskStartScheduler

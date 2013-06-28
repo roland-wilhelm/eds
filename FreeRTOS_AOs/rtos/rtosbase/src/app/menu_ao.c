@@ -34,10 +34,11 @@ static EnterSetTimeEvt l_EnterSetTimeEvt = {{ENTER_SET_TIME_SIG}};
 
 // static variables
 static char output[17];
-static RTCTime rtcTime;
+static RTCTime rtcTime={0,0};
 
 // state handlers
 static QState MenuAO_initial(MenuAO *me, QEvent const *e);
+static QState MenuAO_Brewing(MenuAO *me, QEvent const *e);
 static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e);
 static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e);
 static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e);
@@ -64,6 +65,7 @@ static QState MenuAO_initial(MenuAO *me, QEvent const *e)
 	QActive_subscribe(MenuAOBase, BUTTON_SHORTPRESS_SIG);
 	QActive_subscribe(MenuAOBase, BUTTON_LONGPRESS_SIG);
 	QActive_subscribe(MenuAOBase, AD_VALUE_SIG);
+	QActive_subscribe(MenuAOBase, ALARM_SIG);
 	
 	// Initialize RTC
 	RTC_Init();
@@ -94,6 +96,10 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 			lcd_clear();
 			set_cursor(0, 0);
 			lcd_print((unsigned char*)output);
+			
+			// send BREWSTRENGTH_SET_SIG to CoffeeMachineAO
+			l_BrewStrengthSetEvt.brewStrength = me->brewStrength;
+			QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
 			
 			return Q_HANDLED();
 		}
@@ -152,6 +158,49 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 			
 			return Q_HANDLED();
 		}
+		
+		case ALARM_SIG:
+		{
+				return Q_TRAN(&MenuAO_Brewing);
+		}
+	 	
+		case Q_EXIT_SIG: 
+		{
+		} 	
+	}
+ 
+	return Q_SUPER(&QHsm_top);
+}
+
+/**
+ * Brewing state handler
+ **/
+static QState MenuAO_Brewing(MenuAO *me, QEvent const *e)
+{
+	switch ( e->sig ) 
+	{
+		case Q_INIT_SIG: 
+		{
+			return Q_HANDLED();
+		}
+	      
+		case Q_ENTRY_SIG: 
+		{
+			// display brewing
+			sprintf(output, "with Strength %d", me->brewStrength);
+			lcd_clear();
+			set_cursor(0, 0);
+			lcd_print((unsigned char*)">> BREWING");
+			set_cursor(0, 1);
+			lcd_print((unsigned char*)output);
+			
+			return Q_HANDLED();
+		}
+		
+		case BUTTON_SHORTPRESS_SIG: 
+		{
+			return Q_TRAN(&MenuAO_ClockMenu);
+		}
 	 	
 		case Q_EXIT_SIG: 
 		{
@@ -193,6 +242,11 @@ static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e)
 		case BUTTON_LONGPRESS_SIG: 
 		{	
 			return Q_TRAN(&MenuAO_ChangeBrewStrength);
+		}
+		
+		case ALARM_SIG:
+		{
+			return Q_TRAN(&MenuAO_Brewing);
 		}
 	 	
 		case Q_EXIT_SIG: 
@@ -260,6 +314,11 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
+		}
+		
+		case ALARM_SIG:
+		{
+			return Q_TRAN(&MenuAO_Brewing);
 		}
 	 	
 		case Q_EXIT_SIG: 

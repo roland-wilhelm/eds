@@ -7,10 +7,14 @@
 
 #include <stdbool.h>
 #include <LPC23xx.H>
-#include "pushbutton.h"
+#include "qf_pkg.h"
 
-void T1_IRQHandler (void);
-void P2_10_IRQHandler(void);
+#include "pushbutton.h"
+#include "events.h"
+
+
+__irq void T1_IRQHandler (void);
+__irq void P2_10_IRQHandler(void);
 
 /**
  * Init Timer1
@@ -43,16 +47,6 @@ void T1_stop()
  */
 void P2_10_init()
 {
-#ifdef USE_EINT0
-	/* Setup P2.10 for EINT0 interrupt (falling OR rising edge only!)	*/
-	PINSEL4 |= 0x1 << 20;	// use P2.10 to detect EINT0, not as GPIO pin
-	
-	EXTMODE |= 0x1; // EINT0 is edge sensitive.
-	EXTPOLAR &= ( 0xffffffff^(1 << 0) );	// EINT0 is low-active (falling-edge sensitive)
-	
-	VICVectAddr14 = (unsigned long)P2_10_IRQHandler;
-	VICIntEnable |= (1 << 14);
-#else
 	/* Setup P2.10 for GPIO interrupt (rising and falling edge!) */
 	PINSEL4 &= ( (0xffffffff^(1 << 20))^(1 << 21) );	// use P2.10 as GPIO pin
 	FIO2DIR &= ( 0xffffffff^(1 << 10) );	// P2.10 is input
@@ -60,9 +54,10 @@ void P2_10_init()
 	IO2_INT_EN_R |= (1 << 10); // interrupt on rising edge
 	IO2_INT_EN_F |= (1 << 10); // interrupt on falling edge
 	
+	VICVectPriority17 = 12;
+	
 	VICVectAddr17 = (unsigned long)P2_10_IRQHandler;
 	VICIntEnable |= (1 << 17);
-#endif
 }
 
 /**
@@ -79,63 +74,46 @@ void pushbutton_init(unsigned int longPressTime_ms)
  */
 __irq void T1_IRQHandler (void) 
 {
-	T1_stop();
+	// publish ButtonLongPressed
+	static QEvent buttonLongEvt = {BUTTON_LONGPRESS_SIG, 0};
 	
-	// TODO dispatch ButtonLongPressed
+	//vPortEnterCritical();
+	
+	QF_publish(&buttonLongEvt);
+	
+	T1_stop();
 	
   T1IR        = 1;	// clear interrupt flag
   VICVectAddr = 0;	// acknowledge interrupt
+	
+	//vPortExitCritical();
 }
 
 /**
  * P2.10 ISR: Executed on falling/rising edges on P2.10
  */
 __irq void P2_10_IRQHandler(void)
-{
-	bool buttonPressed = false;	// true: button pressed, false: button released
+{	
+	//vPortEnterCritical();
 	
-#ifdef USE_EINT0
-	if (EXTPOLAR & (1 << 0))
-	{
-		buttonPressed = false;
-		
-		EXTPOLAR &= ( 0xffffffff^(1 << 0) );	// set falling edge sensitive
-	}
-	else
-	{
-		buttonPressed = true;
-		
-		EXTPOLAR |= (1 << 0);	// // set rising edge sensitive
-	}
-	
-	EXTINT |= (1 << 0);	// Clear interrupt flag for EINT0
-	
-#else
 	if (IO2_INT_STAT_R & (1 << 10))
 	{
-		buttonPressed = false;
-	}
-	else // if (IO2_INT_STAT_F & (1 << 10))
-	{
-		buttonPressed = true;
-	}
-	
-	IO2_INT_CLR |= (1 << 10); // Clear interrupt flag for GPIO pin P2.10
-#endif
-	
-	if (buttonPressed)
-	{
+		// button pressed
+		
 		// start timer, if button is pressed long enough a timer interrupt is triggered
 		T1_start();
 	}
-	else // buttonReleased
+	else // if (IO2_INT_STAT_F & (1 << 10))
 	{
+		// button released
 		if (T1TCR == 1)
 		{
+			// publish ButtonShortPressed
+			static QEvent buttonShortEvt = {BUTTON_SHORTPRESS_SIG, 0};
+			QF_publish(&buttonShortEvt);
+			
 			// Timer0 still running, no long press yet
 			T1_stop();
-			
-			// TODO dispatch ButtonShortPressed
 		}
 		else
 		{
@@ -143,5 +121,8 @@ __irq void P2_10_IRQHandler(void)
 		}
 	}
 	
+	IO2_INT_CLR |= (1 << 10); // clear interrupt flag for GPIO pin P2.10	
   VICVectAddr = 0; // acknowledge interrupt
+	
+	//vPortExitCritical();
 }

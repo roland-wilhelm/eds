@@ -27,7 +27,6 @@ void ADC_IRQHandler(void) __irq {
 	DBG("ADC %d\n\r", value_cur);
 	if(value_old != value_cur) {
 				
-		
  		adValueEvt.super = adQEvt;
 		adValueEvt.value = value_cur;
 		value_old = value_cur;
