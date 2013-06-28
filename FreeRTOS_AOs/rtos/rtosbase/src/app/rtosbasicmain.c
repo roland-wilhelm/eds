@@ -30,26 +30,26 @@
 // List for publish-subscribe
 static QSubscrList subscrSto[MAX_PUB_SIG];
 
-
-void my_sleep(portTickType ticks_sleep) {
-	
+/*
+void my_sleep(portTickType ticks_sleep) 
+{	
 	portTickType start = 0;
 	
-	start = xTaskGetTickCount();	
-	for(;;) {
-		
-		if( (xTaskGetTickCount() - start) <= ticks_sleep ) {
-			
+	start = xTaskGetTickCount();
+	
+	for(;;) 
+	{
+		if( (xTaskGetTickCount() - start) <= ticks_sleep ) 
+		{	
 			taskYIELD();
 		}
-		else {
-			
+		else 
+		{
 			break;
 		}		
-		
 	}
-	
 }
+*/
 
 void qftick_task( void * pvParameters )
 {
@@ -66,12 +66,12 @@ void qftick_task( void * pvParameters )
 		
 			xLastWakeTime = xTaskGetTickCount();
 			
-			// increase timer 
+			// increase pushbutton timer 
       counter(xFrequency);
 		
 			//my_sleep(xFrequency);
 		
-			QF_tick();   		//QM Port
+			QF_tick();	//QM Port
 		
 			if(count >= 10) {
 				start_ad_conversion();
@@ -80,8 +80,7 @@ void qftick_task( void * pvParameters )
 			count++;
 		
 		// Wait for the next cycle.
-			vTaskDelayUntil(&xLastWakeTime, xFrequency);			
-			
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);				
 	}
 }
 
@@ -90,7 +89,6 @@ int main (void)
 {
 	xTaskHandle xHandle;
 	
-			
 	// Hardware initialization
 	BSP_Init();
 	ad_converter_init();
@@ -99,7 +97,6 @@ int main (void)
 	// QP/C framework initialization
 	QF_init();
 	QF_psInit(subscrSto, Q_DIM(subscrSto));
-
 
 	// create tick task
 	xTaskCreate(qftick_task, "QFTICK" , 0x100 * 3, NULL , 0, &xHandle);
@@ -112,7 +109,7 @@ int main (void)
 	// start active objects	
  	QActive_start(SetTimeAOBase, 1, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
  	QActive_start(CoffeeMachineAOBase, 2, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
-	// Muss hier stehen, da init QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
+	// start MenuAO after CoffeeMachineAO (MenuAO sends event to CoffeeMachine in Entry)
   QActive_start(MenuAOBase, 3, 0, SIZE_OF_EVENT_QUEUE, (void*)0, 0, (QEvent*)0);
   
 	// run QF

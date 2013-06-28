@@ -38,11 +38,14 @@ static RTCTime rtcTime={0,0};
 
 // state handlers
 static QState MenuAO_initial(MenuAO *me, QEvent const *e);
-static QState MenuAO_Brewing(MenuAO *me, QEvent const *e);
+static QState MenuAO_Idle(MenuAO *me, QEvent const *e);
+
 static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e);
 static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e);
 static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e);
 static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e);
+
+static QState MenuAO_DisplayBrewing(MenuAO *me, QEvent const *e);
 
 /**
  * constructor
@@ -71,7 +74,38 @@ static QState MenuAO_initial(MenuAO *me, QEvent const *e)
 	RTC_Init();
 	RTC_Start();
 	
-	return Q_TRAN(&MenuAO_ClockMenu);
+	return Q_TRAN(&MenuAO_Idle);
+}
+
+/**
+ * DisplayMenu state handler
+ **/
+static QState MenuAO_Idle(MenuAO *me, QEvent const *e)
+{
+	switch ( e->sig ) 
+	{
+		case Q_INIT_SIG: 
+		{
+			return Q_TRAN(&MenuAO_ClockMenu);
+		}
+	      
+		case Q_ENTRY_SIG: 
+		{
+			return Q_HANDLED();
+		}
+		
+		case ALARM_SIG:
+		{
+			// alarm signal -> display brewing
+			return Q_TRAN(&MenuAO_DisplayBrewing);
+		}
+	 	
+		case Q_EXIT_SIG: 
+		{
+		} 	
+	}
+ 
+	return Q_SUPER(&QHsm_top);
 }
 
 /**
@@ -158,56 +192,13 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 			
 			return Q_HANDLED();
 		}
-		
-		case ALARM_SIG:
-		{
-				return Q_TRAN(&MenuAO_Brewing);
-		}
 	 	
 		case Q_EXIT_SIG: 
 		{
 		} 	
 	}
  
-	return Q_SUPER(&QHsm_top);
-}
-
-/**
- * Brewing state handler
- **/
-static QState MenuAO_Brewing(MenuAO *me, QEvent const *e)
-{
-	switch ( e->sig ) 
-	{
-		case Q_INIT_SIG: 
-		{
-			return Q_HANDLED();
-		}
-	      
-		case Q_ENTRY_SIG: 
-		{
-			// display brewing
-			sprintf(output, "with Strength %d", me->brewStrength);
-			lcd_clear();
-			set_cursor(0, 0);
-			lcd_print((unsigned char*)">> BREWING");
-			set_cursor(0, 1);
-			lcd_print((unsigned char*)output);
-			
-			return Q_HANDLED();
-		}
-		
-		case BUTTON_SHORTPRESS_SIG: 
-		{
-			return Q_TRAN(&MenuAO_ClockMenu);
-		}
-	 	
-		case Q_EXIT_SIG: 
-		{
-		} 	
-	}
- 
-	return Q_SUPER(&QHsm_top);
+	return Q_SUPER(&MenuAO_Idle);
 }
 
 /**
@@ -243,18 +234,13 @@ static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e)
 		{	
 			return Q_TRAN(&MenuAO_ChangeBrewStrength);
 		}
-		
-		case ALARM_SIG:
-		{
-			return Q_TRAN(&MenuAO_Brewing);
-		}
 	 	
 		case Q_EXIT_SIG: 
 		{
 		} 	
 	}
  
-	return Q_SUPER(&QHsm_top);
+	return Q_SUPER(&MenuAO_Idle);
 }
 
 /**
@@ -314,11 +300,6 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
-		}
-		
-		case ALARM_SIG:
-		{
-			return Q_TRAN(&MenuAO_Brewing);
 		}
 	 	
 		case Q_EXIT_SIG: 
@@ -421,5 +402,43 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 		} 	
 	}
  
-	return Q_SUPER(&QHsm_top);
+	return Q_SUPER(&MenuAO_Idle);
+}
+
+/**
+ * DisplayBrewing state handler
+ **/
+static QState MenuAO_DisplayBrewing(MenuAO *me, QEvent const *e)
+{
+	switch ( e->sig ) 
+	{
+		case Q_INIT_SIG: 
+		{
+			return Q_HANDLED();
+		}
+	      
+		case Q_ENTRY_SIG: 
+		{
+			// display brewing
+			lcd_clear();
+			set_cursor(0, 0);
+			lcd_print((unsigned char*)">> BREWING");
+			set_cursor(0, 1);
+			sprintf(output, "with Strength %d", me->brewStrength);
+			lcd_print((unsigned char*)output);
+			
+			return Q_HANDLED();
+		}
+		
+		case BUTTON_SHORTPRESS_SIG: 
+		{
+			return Q_TRAN(&MenuAO_ClockMenu);
+		}
+	 	
+		case Q_EXIT_SIG: 
+		{
+		} 	
+	}
+ 
+	return Q_SUPER(&MenuAO_Idle);
 }
