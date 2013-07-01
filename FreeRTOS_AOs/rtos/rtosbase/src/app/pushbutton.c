@@ -77,16 +77,16 @@ __irq void T1_IRQHandler (void)
 	// publish ButtonLongPressed
 	static QEvent buttonLongEvt = {BUTTON_LONGPRESS_SIG, 0};
 	
-	//vPortEnterCritical();
+	QF_INT_LOCK();
 	
 	QF_publish(&buttonLongEvt);
 	
 	T1_stop();
 	
+	QF_INT_UNLOCK();
+	
   T1IR        = 1;	// clear interrupt flag
   VICVectAddr = 0;	// acknowledge interrupt
-	
-	//vPortExitCritical();
 }
 
 /**
@@ -94,9 +94,9 @@ __irq void T1_IRQHandler (void)
  */
 __irq void P2_10_IRQHandler(void)
 {	
-	//vPortEnterCritical();
+	QF_INT_LOCK();
 	
-	if (IO2_INT_STAT_R & (1 << 10))
+	if (IO2_INT_STAT_F & (1 << 10))
 	{
 		// button pressed
 		
@@ -121,8 +121,8 @@ __irq void P2_10_IRQHandler(void)
 		}
 	}
 	
+	QF_INT_UNLOCK();
+	
 	IO2_INT_CLR |= (1 << 10); // clear interrupt flag for GPIO pin P2.10	
   VICVectAddr = 0; // acknowledge interrupt
-	
-	//vPortExitCritical();
 }

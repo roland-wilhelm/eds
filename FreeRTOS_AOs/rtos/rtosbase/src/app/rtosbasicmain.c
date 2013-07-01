@@ -20,11 +20,14 @@
 #include "ad_ao.h"
 #include "coffeemachine_ao.h"
 #include "menu_ao.h"
+#include "pushbutton.h"
 #include "push_button2.h"
 #include "settime_ao.h"
 
 
-#define SIZE_OF_EVENT_QUEUE 5
+#define ENHANCE_USABILITY
+
+#define SIZE_OF_EVENT_QUEUE 9
 
 
 // List for publish-subscribe
@@ -60,30 +63,30 @@ void qftick_task( void * pvParameters )
 	const portTickType xFrequency = 10;
  
 	// Task code goes here.
-	for( ;; ) {      
-			
-			static unsigned int count = 0;
+	for( ;; ) 
+	{      			
+		static unsigned int count = 0;
+	
+		xLastWakeTime = xTaskGetTickCount();
 		
-			xLastWakeTime = xTaskGetTickCount();
-			
-			// increase pushbutton timer 
-      counter(xFrequency);
+		QF_tick();	//QM Port
+
+#ifndef ENHANCE_USABILITY	
+		// increase pushbutton timer 
+    counter(xFrequency);
+#endif
 		
-			//my_sleep(xFrequency);
-		
-			QF_tick();	//QM Port
-		
-			if(count >= 10) {
-				start_ad_conversion();
-				count = 0;
-			}
-			count++;
+		// trigger adc each 10 ticks
+		if(count >= 10) {
+			start_ad_conversion();
+			count = 0;
+		}
+		count++;
 		
 		// Wait for the next cycle.
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);				
 	}
 }
-
 
 int main (void) 
 {
@@ -91,8 +94,15 @@ int main (void)
 	
 	// Hardware initialization
 	BSP_Init();
-	ad_converter_init();
-	int0_init(); // init int0 as interrupt for pushbutton
+	ad_converter_init();	// init adc
+	
+#ifdef ENHANCE_USABILITY		
+	// using franz' pushbutton
+	pushbutton_init(600);	// init push button (long press 600ms)
+#else
+	// using roland's pushbutton
+	int0_init();
+#endif
 	
 	// QP/C framework initialization
 	QF_init();
