@@ -76,6 +76,8 @@ static QState CoffeeMachineAO_Idle(CoffeeMachineAO *me, QEvent const *e)
 			 brewStrength++; // make sure that value is between 1 and 3
 			 LEDsToFlash = brewStrength * LEDS_PER_BREW_STRENGH;
 			 
+			 LED_Out(ALL_LEDS_OFF);
+			 
 			 for(i = 0; i < LEDsToFlash; i++)
 				LED_On(i);
 			
@@ -85,6 +87,7 @@ static QState CoffeeMachineAO_Idle(CoffeeMachineAO *me, QEvent const *e)
 		 case Q_EXIT_SIG:
 		 {
 			 DBG("CoffeeMachine Idle: EXIT");
+			 return Q_HANDLED();
 		 }
 	 }
 	 
@@ -121,6 +124,7 @@ static QState CoffeeMachineAO_Brewing(CoffeeMachineAO *me, QEvent const *e)
 		 {
 			 DBG("CoffeeMachine Brewing: EXIT");
 			 QActive_unsubscribe((QActive *)me, BUTTON_SHORTPRESS_SIG);
+			 return Q_HANDLED();
 		 }
 	 }
 	 

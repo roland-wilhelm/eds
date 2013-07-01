@@ -96,12 +96,16 @@ static QState MenuAO_Idle(MenuAO *me, QEvent const *e)
 		
 		case ALARM_SIG:
 		{
+			// setting time might be interrupted, reset guard
+			me->waitingForSetTime = false;
+			
 			// alarm signal -> display brewing
 			return Q_TRAN(&MenuAO_DisplayBrewing);
 		}
 	 	
 		case Q_EXIT_SIG: 
 		{
+			return Q_HANDLED();
 		} 	
 	}
  
@@ -126,7 +130,7 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 			RTC_GetTime(&rtcTime);
 			
 			// display clock menu (1st row of LCD)
-			sprintf(output, "1: Clock %2d:%2d", rtcTime.RTC_Hour, rtcTime.RTC_Min);
+			sprintf(output, "1: Clock %02d:%02d", rtcTime.RTC_Hour, rtcTime.RTC_Min);
 			lcd_clear();
 			set_cursor(0, 0);
 			lcd_print((unsigned char*)output);
@@ -168,7 +172,7 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 			me->waitingForSetTime = false;
 			
 			// display new time (1st row of LCD)
-			sprintf(output, "1: Clock %2d:%2d", evt->time.RTC_Hour, evt->time.RTC_Min);
+			sprintf(output, "1: Clock %02d:%02d", evt->time.RTC_Hour, evt->time.RTC_Min);
 			lcd_clear();
 			set_cursor(0, 0);
 			lcd_print((unsigned char*)output);
@@ -185,7 +189,7 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 		{
 			// display updated time
 			TimeUpdateEvt* evt = (TimeUpdateEvt*)e;
-			sprintf(output, "1: Clock %2d:%2d", evt->time.RTC_Hour, evt->time.RTC_Min);
+			sprintf(output, "1: Clock %02d:%02d", evt->time.RTC_Hour, evt->time.RTC_Min);
 			
 			set_cursor(0, 0);
 			lcd_print((unsigned char*)output);
@@ -195,6 +199,7 @@ static QState MenuAO_ClockMenu(MenuAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
+			return Q_HANDLED();
 		} 	
 	}
  
@@ -216,7 +221,7 @@ static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e)
 		case Q_ENTRY_SIG: 
 		{
 			// display brew strength menu (1st row of LCD)
-			sprintf(output, "2: Strength %d", me->brewStrength);
+			sprintf(output, "2: Strength %d", 2*me->brewStrength+2);
 			lcd_clear();
 			set_cursor(0, 0);
 			lcd_print((unsigned char*)output);
@@ -237,6 +242,7 @@ static QState MenuAO_BrewStrengthMenu(MenuAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
+			return Q_HANDLED();
 		} 	
 	}
  
@@ -263,7 +269,7 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 			tmpBrewStrength = Unchanged;
 			
 			// display change brew strength (2nd row of LCD)
-			sprintf(output, "SetStrength> %d", me->brewStrength);
+			sprintf(output, "SetStrength> %d", 2*me->brewStrength+2);
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);
 			
@@ -278,6 +284,24 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 		
 		case BUTTON_LONGPRESS_SIG: 
 		{	
+			if (tmpBrewStrength != Unchanged)
+			{
+				// brew strength has been changed
+				me->brewStrength = tmpBrewStrength;
+				
+				// TODO maybe better use dynamic event, but should be okay here!
+				l_BrewStrengthSetEvt.brewStrength = tmpBrewStrength;
+				
+				// send BREWSTRENGTH_SET_SIG to CoffeeMachineAO
+				QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
+			
+				// display brew strength menu (1st row of LCD)
+				sprintf(output, "2: Strength %d", 2*me->brewStrength+2);
+				lcd_clear();
+				set_cursor(0, 0);
+				lcd_print((unsigned char*)output);
+			}
+			
 			// long press > leave changing state and go back to submenu
 			return Q_TRAN(&MenuAO_BrewStrengthMenu);
 		}
@@ -295,7 +319,7 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 			tmpBrewStrength = (BrewStrength)(((evt->value * 2 + 50) / 100));
 					
 			// display change brew strength (2nd row of LCD)
-			sprintf(output, "SetStrength> %d", tmpBrewStrength);
+			sprintf(output, "SetStrength> %d", 2*tmpBrewStrength+2);
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);
 			
@@ -304,23 +328,7 @@ static QState MenuAO_ChangeBrewStrength(MenuAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
-			if (tmpBrewStrength != Unchanged)
-			{
-				// brew strength has been changed
-				me->brewStrength = tmpBrewStrength;
-				
-				// TODO maybe better use dynamic event, but should be okay here!
-				l_BrewStrengthSetEvt.brewStrength = tmpBrewStrength;
-				
-				// send BREWSTRENGTH_SET_SIG to CoffeeMachineAO
-				QActive_postFIFO(CoffeeMachineAOBase, (QEvent*)&l_BrewStrengthSetEvt);
-			
-				// display brew strength menu (1st row of LCD)
-				sprintf(output, "2: Strength %d", me->brewStrength);
-				lcd_clear();
-				set_cursor(0, 0);
-				lcd_print((unsigned char*)output);
-			}
+			return Q_HANDLED();
 		} 	
 	}
 	
@@ -343,7 +351,7 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 		{
 			// get current alarm
 			RTC_GetAlarm(&rtcTime);
-			sprintf(output, "3: Alarm %2d:%2d", rtcTime.RTC_Hour, rtcTime.RTC_Min);
+			sprintf(output, "3: Alarm %02d:%02d", rtcTime.RTC_Hour, rtcTime.RTC_Min);
 			
 			// display alarm menu (1st row of LCD)
 			lcd_clear();
@@ -388,7 +396,7 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 			RTC_AlarmEnable();
 			
 			// display new alarm
-			sprintf(output, "3: Alarm %2d:%2d", evt->time.RTC_Hour, evt->time.RTC_Min);
+			sprintf(output, "3: Alarm %02d:%02d", evt->time.RTC_Hour, evt->time.RTC_Min);
 
 			lcd_clear();
 			set_cursor(0, 0);
@@ -399,6 +407,7 @@ static QState MenuAO_AlarmMenu(MenuAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
+			return Q_HANDLED();
 		} 	
 	}
  
@@ -424,7 +433,7 @@ static QState MenuAO_DisplayBrewing(MenuAO *me, QEvent const *e)
 			set_cursor(0, 0);
 			lcd_print((unsigned char*)">> BREWING");
 			set_cursor(0, 1);
-			sprintf(output, "with Strength %d", me->brewStrength);
+			sprintf(output, "with Strength %d", 2*me->brewStrength+2);
 			lcd_print((unsigned char*)output);
 			
 			return Q_HANDLED();
@@ -437,6 +446,7 @@ static QState MenuAO_DisplayBrewing(MenuAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
+			return Q_HANDLED();
 		} 	
 	}
  

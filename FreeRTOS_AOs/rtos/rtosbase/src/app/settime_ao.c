@@ -90,6 +90,7 @@ static QState SetTimeAO_Idle(SetTimeAO *me, QEvent const *e)
 			 	
 		case Q_EXIT_SIG: 
 		{
+			return Q_HANDLED();
 		} 	
 	}
  
@@ -117,28 +118,43 @@ static QState SetTimeAO_Changing(SetTimeAO *me, QEvent const *e)
 			QActive_subscribe(SetTimeAOBase, BUTTON_SHORTPRESS_SIG);
 			QActive_subscribe(SetTimeAOBase, BUTTON_LONGPRESS_SIG);
 			QActive_subscribe(SetTimeAOBase, AD_VALUE_SIG);
+			QActive_subscribe(SetTimeAOBase, ALARM_SIG);
 
 			return Q_HANDLED();
 		}
 		
-		case BUTTON_LONGPRESS_SIG: 
+		case BUTTON_LONGPRESS_SIG:
+		{
+			//Send Event: EvtTimeSet
+			l_TimeSetEvt.time.RTC_Min = l_SetTimeAO.time.RTC_Min;
+			l_TimeSetEvt.time.RTC_Hour = l_SetTimeAO.time.RTC_Hour;
+			QActive_postFIFO(MenuAOBase, (QEvent*)&l_TimeSetEvt);
+			
+			//Unsubscribe Button & AD_Value
+			QActive_unsubscribe(SetTimeAOBase, BUTTON_SHORTPRESS_SIG);
+			QActive_unsubscribe(SetTimeAOBase, BUTTON_LONGPRESS_SIG);
+			QActive_unsubscribe(SetTimeAOBase, AD_VALUE_SIG);
+			QActive_unsubscribe(SetTimeAOBase, ALARM_SIG);
+			
+			// long press > leave changing state and go back to Idle
+			return Q_TRAN(&SetTimeAO_Idle);
+		}
+		
+		case ALARM_SIG:
 		{
 			//Unsubscribe Button & AD_Value
 			QActive_unsubscribe(SetTimeAOBase, BUTTON_SHORTPRESS_SIG);
 			QActive_unsubscribe(SetTimeAOBase, BUTTON_LONGPRESS_SIG);
 			QActive_unsubscribe(SetTimeAOBase, AD_VALUE_SIG);
+			QActive_unsubscribe(SetTimeAOBase, ALARM_SIG);
 			
-			// long press > leave changing state and go back to Idle
+			// alarm > leave changing state and go back to Idle
 			return Q_TRAN(&SetTimeAO_Idle);
 		}
 	 	
 		case Q_EXIT_SIG: 
-		{			
-			//Send Event: EvtTimeSet
-			l_TimeSetEvt.time.RTC_Min = l_SetTimeAO.time.RTC_Min;
-			l_TimeSetEvt.time.RTC_Hour = l_SetTimeAO.time.RTC_Hour;
-			//TODO: MenuAO not declared...
-			QActive_postFIFO(MenuAOBase, (QEvent*)&l_TimeSetEvt);
+		{
+			return Q_HANDLED();
 		} 	
 	}
  
@@ -202,7 +218,7 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 			l_SetTimeAO.time.RTC_Hour = (uint8_t)adc_temp;
 			
 			//Generate Formated String
-			sprintf(output, "SetHour> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);			
+			sprintf(output, "SetHour> %02d:%02d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);			
 			// display changed Hours (2nd row of LCD)
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);
@@ -212,6 +228,7 @@ static QState SetTimeAO_ChangeHrs(SetTimeAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
+			return Q_HANDLED();
 		} 	
 	}
 	
@@ -276,7 +293,7 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 			l_SetTimeAO.time.RTC_Min = (uint8_t)adc_temp;
 			
 			//Generate Formated String
-			sprintf(output, "Set Min> %2d:%2d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);			
+			sprintf(output, "Set Min> %02d:%02d", l_SetTimeAO.time.RTC_Hour, l_SetTimeAO.time.RTC_Min);			
 			// display changed Minutes (2nd row of LCD)
 			set_cursor(0, 1);
 			lcd_print((unsigned char*)output);
@@ -286,6 +303,7 @@ static QState SetTimeAO_ChangeMin(SetTimeAO *me, QEvent const *e)
 	 	
 		case Q_EXIT_SIG: 
 		{
+			return Q_HANDLED();
 		} 	
 	}
  
